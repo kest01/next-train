@@ -143,6 +143,7 @@ public class TrainsWidget extends AppWidgetProvider {
                         public void onConnectionSuspended(int i) {
                             Log.i(LOG_TAG, "ConnectionCallbacks.onConnectionSuspended(): ");
                         }
+
                     })
                     .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                         @Override
