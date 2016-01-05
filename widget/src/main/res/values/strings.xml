@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Next Train</string>
+    <string name="widget_name">Расписание электричек</string>
+    <string name="widget_text">Текст на виджете</string>
+</resources>
