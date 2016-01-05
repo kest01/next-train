@@ -15,28 +15,24 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 
 /**
  * Created by KKharitonov on 04.01.2016.
  */
-public class TrainsWidget extends AppWidgetProvider {
+public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     final static private String LOG_TAG = "trainsLogs";
 
     private final String UPDATE_ALL_WIDGETS = "update_all_widgets";
     private final String UPDATE_LOCATION = "update_location";
 
     private GoogleApiClient googleApiClient;
-    private Location lastLocation;
-    private Context context;
+    private static Location lastLocation;
 
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
         Log.d(LOG_TAG, "onEnabled");
-        this.context = context;
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         scheduleUpdateLocation(context, alarmManager);
@@ -72,12 +68,21 @@ public class TrainsWidget extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         super.onDeleted(context, appWidgetIds);
         Log.d(LOG_TAG, "onDeleted " + Arrays.toString(appWidgetIds));
-        Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(UPDATE_ALL_WIDGETS);
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        AlarmManager alarmManager = (AlarmManager) context
-                .getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pIntent);
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            Log.d(LOG_TAG, "googleApiClient.disconnect()");
+            googleApiClient.disconnect();
+        }
+
+        Intent updateIntent = new Intent(context, TrainsWidget.class);
+        updateIntent.setAction(UPDATE_ALL_WIDGETS);
+        PendingIntent pUpdateIntent = PendingIntent.getBroadcast(context, 0, updateIntent, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pUpdateIntent);
+        Intent locationIntent = new Intent(context, TrainsWidget.class);
+        locationIntent.setAction(UPDATE_LOCATION);
+        PendingIntent pLocationIntent = PendingIntent.getBroadcast(context, 0, locationIntent, 0);
+        alarmManager.cancel(pLocationIntent);
+
     }
 
     @Override
@@ -89,7 +94,7 @@ public class TrainsWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.d(LOG_TAG, "onReceive: " + intent);
+        Log.d(LOG_TAG, "onReceive: " + intent + " - " + this);
         if (intent.getAction().equalsIgnoreCase(UPDATE_ALL_WIDGETS)) {
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -98,7 +103,6 @@ public class TrainsWidget extends AppWidgetProvider {
                 updateWidget(context, appWidgetManager, appWidgetID);
             }
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
-
             getLocationApi(context).connect();
         }
     }
@@ -117,15 +121,14 @@ public class TrainsWidget extends AppWidgetProvider {
     }
 
     private String getTextMessage() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return sdf.format(new Date(System.currentTimeMillis()));
-/*
+//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//        return sdf.format(new Date(System.currentTimeMillis()));
+
         if (lastLocation == null) {
             return "Location not found";
         } else {
             return lastLocation.getLongitude() + ", " + lastLocation.getLatitude();
         }
-*/
     }
 
 
@@ -133,34 +136,18 @@ public class TrainsWidget extends AppWidgetProvider {
         if (googleApiClient == null) {
             Log.d(LOG_TAG, "getLocationApi: ");
             googleApiClient = new GoogleApiClient.Builder(ctx)
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(Bundle bundle) {
-                            Log.i(LOG_TAG, "ConnectionCallbacks.onConnected(): ");
-                        }
-
-                        @Override
-                        public void onConnectionSuspended(int i) {
-                            Log.i(LOG_TAG, "ConnectionCallbacks.onConnectionSuspended(): ");
-                        }
-
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(ConnectionResult connectionResult) {
-                            Log.e(LOG_TAG, "ConnectionCallbacks.OnConnectionFailed(): ");
-                        }
-                    })
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
         }
         return googleApiClient;
     }
-/*
-//    @Override
+
+    @Override
     public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "onConnected: " + bundle);
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        Log.d(LOG_TAG, "onConnected: " + googleApiClient);
+        updateLastLocation();
         Log.d(LOG_TAG, "lastLocation: " + lastLocation);
         if (googleApiClient != null) {
             Log.d(LOG_TAG, "googleApiClient.disconnect()");
@@ -168,15 +155,24 @@ public class TrainsWidget extends AppWidgetProvider {
         }
     }
 
-//    @Override
+    private void updateLastLocation() {
+        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if( location != null ){
+            lastLocation = location;
+        } else {
+            Log.d(LOG_TAG, "lastLocation has not changed");
+        }
+    }
+
+    @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOG_TAG, "onConnectionSuspended: " + i);
     }
 
-//    @Override
+    @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(LOG_TAG, "onConnectionFailed: " + connectionResult);
-    }*/
+    }
 
 
 }
