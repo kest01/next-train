@@ -1,7 +1,6 @@
 package ru.kest.nexttrain.widget;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -14,6 +13,8 @@ import android.widget.RemoteViews;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import ru.kest.nexttrain.widget.util.Constants;
+import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
 import java.util.Arrays;
 
@@ -22,9 +23,6 @@ import java.util.Arrays;
  */
 public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     final static public String LOG_TAG = "trainsLogs";
-
-    private final String UPDATE_ALL_WIDGETS = "update_all_widgets";
-    private final String UPDATE_LOCATION = "update_location";
 
     private GoogleApiClient googleApiClient;
     private static Location lastLocation;
@@ -35,33 +33,19 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
         Log.d(LOG_TAG, "onEnabled");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        scheduleUpdateLocation(context, alarmManager);
-        scheduleUpdateWidget(context, alarmManager);
+//        SchedulerUtil.scheduleUpdateWidget(context, alarmManager);
+        SchedulerUtil.scheduleUpdateLocation(context, alarmManager);
     }
-
-    private void scheduleUpdateWidget(Context context, AlarmManager alarmManager) {
-        Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(UPDATE_ALL_WIDGETS);
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis()+3000, 60000, pIntent);
-    }
-
-    private void scheduleUpdateLocation(Context context, AlarmManager alarmManager) {
-        Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(UPDATE_LOCATION);
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-        alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, pIntent);
-    }
-
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d(LOG_TAG, "onUpdate " + Arrays.toString(appWidgetIds));
-        for (int id : appWidgetIds) {
+        SchedulerUtil.sendUpdateLocation(context);
+/*        for (int id : appWidgetIds) {
             updateWidget(context, appWidgetManager, id);
-        }
+        }*/
     }
 
     @Override
@@ -73,15 +57,9 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
             googleApiClient.disconnect();
         }
 
-        Intent updateIntent = new Intent(context, TrainsWidget.class);
-        updateIntent.setAction(UPDATE_ALL_WIDGETS);
-        PendingIntent pUpdateIntent = PendingIntent.getBroadcast(context, 0, updateIntent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pUpdateIntent);
-        Intent locationIntent = new Intent(context, TrainsWidget.class);
-        locationIntent.setAction(UPDATE_LOCATION);
-        PendingIntent pLocationIntent = PendingIntent.getBroadcast(context, 0, locationIntent, 0);
-        alarmManager.cancel(pLocationIntent);
+//        SchedulerUtil.cancelScheduleUpdateWidget(context, alarmManager);
+        SchedulerUtil.cancelScheduleUpdateLocation(context, alarmManager);
     }
 
     @Override
@@ -94,18 +72,18 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         Log.d(LOG_TAG, "onReceive: " + intent + " - " + this);
-        if (intent.getAction().equalsIgnoreCase(UPDATE_ALL_WIDGETS)) {
+        if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_ALL_WIDGETS)) {
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             for (int appWidgetID : ids) {
                 updateWidget(context, appWidgetManager, appWidgetID);
             }
-            if (lastLocation != null) {
-                new WeatherRequestTask().execute(lastLocation);
-            }
-        } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
+        } else if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_LOCATION)) {
             getLocationApi(context).connect();
+            if (lastLocation != null) {
+                new WeatherRequestTask(context).execute(lastLocation);
+            }
         }
     }
 
