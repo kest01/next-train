@@ -1,4 +1,4 @@
-package ru.kest.nexttrain.widget;
+package ru.kest.nexttrain.widget.services;
 
 import android.content.Context;
 import android.location.Location;

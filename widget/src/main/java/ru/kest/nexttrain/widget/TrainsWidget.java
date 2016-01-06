@@ -7,12 +7,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.RemoteViews;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import ru.kest.nexttrain.widget.services.LocationClient;
+import ru.kest.nexttrain.widget.services.WeatherRequestTask;
 import ru.kest.nexttrain.widget.util.Constants;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
@@ -21,11 +20,10 @@ import java.util.Arrays;
 /**
  * Created by KKharitonov on 04.01.2016.
  */
-public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    final static public String LOG_TAG = "trainsLogs";
+public class TrainsWidget extends AppWidgetProvider {
+    final static public String LOG_TAG = "nextTrainsLogs";
 
-    private GoogleApiClient googleApiClient;
-    private static Location lastLocation;
+//    private GoogleApiClient googleApiClient;
 
     @Override
     public void onEnabled(Context context) {
@@ -52,10 +50,6 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
     public void onDeleted(Context context, int[] appWidgetIds) {
         super.onDeleted(context, appWidgetIds);
         Log.d(LOG_TAG, "onDeleted " + Arrays.toString(appWidgetIds));
-        if (googleApiClient != null && googleApiClient.isConnected()) {
-            Log.d(LOG_TAG, "googleApiClient.disconnect()");
-            googleApiClient.disconnect();
-        }
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 //        SchedulerUtil.cancelScheduleUpdateWidget(context, alarmManager);
@@ -69,7 +63,7 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
         Log.d(LOG_TAG, "onReceive: " + intent + " - " + this);
         if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_ALL_WIDGETS)) {
@@ -80,9 +74,9 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
                 updateWidget(context, appWidgetManager, appWidgetID);
             }
         } else if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_LOCATION)) {
-            getLocationApi(context).connect();
-            if (lastLocation != null) {
-                new WeatherRequestTask(context).execute(lastLocation);
+            new LocationClient(context).connect();
+            if (LocationClient.getLastLocation() != null) {
+                new WeatherRequestTask(context).execute(LocationClient.getLastLocation());
             }
         }
     }
@@ -104,55 +98,12 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
 //        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 //        return sdf.format(new Date(System.currentTimeMillis()));
 
+        Location lastLocation = LocationClient.getLastLocation();
         if (lastLocation == null) {
             return "Location not found";
         } else {
             return lastLocation.getLongitude() + ", " + lastLocation.getLatitude();
         }
-    }
-
-
-    private GoogleApiClient getLocationApi(Context ctx) {
-        if (googleApiClient == null) {
-            Log.d(LOG_TAG, "getLocationApi: ");
-            googleApiClient = new GoogleApiClient.Builder(ctx)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-        return googleApiClient;
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "onConnected: " + googleApiClient);
-        updateLastLocation();
-        Log.d(LOG_TAG, "lastLocation: " + lastLocation);
-        if (googleApiClient != null) {
-            Log.d(LOG_TAG, "googleApiClient.disconnect()");
-            googleApiClient.disconnect();
-            googleApiClient = null;
-        }
-    }
-
-    private void updateLastLocation() {
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if( location != null ){
-            lastLocation = location;
-        } else {
-            Log.d(LOG_TAG, "lastLocation has not changed");
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "onConnectionSuspended: " + i);
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "onConnectionFailed: " + connectionResult);
     }
 
 

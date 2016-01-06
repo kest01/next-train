@@ -25,6 +25,17 @@ public class SchedulerUtil {
         );
     }
 
+    public static void scheduleUpdateLocation(Context context, AlarmManager alarmManager) {
+        alarmManager.setRepeating(
+                AlarmManager.RTC,
+                System.currentTimeMillis(),
+                60000,
+                createBroadcastPI(
+                        context, createUpdateLocationIntent(context)
+                )
+        );
+    }
+
     public static void sendUpdateWidget(Context context) {
         Intent intent = createUpdateWidgetIntent(context);
         context.sendBroadcast(intent);
@@ -47,17 +58,6 @@ public class SchedulerUtil {
         alarmManager.cancel(
                 createBroadcastPI(
                     context, createUpdateLocationIntent(context)
-                )
-        );
-    }
-
-    public static void scheduleUpdateLocation(Context context, AlarmManager alarmManager) {
-        alarmManager.setRepeating(
-                AlarmManager.RTC,
-                System.currentTimeMillis(),
-                60000,
-                createBroadcastPI(
-                        context, createUpdateLocationIntent(context)
                 )
         );
     }
