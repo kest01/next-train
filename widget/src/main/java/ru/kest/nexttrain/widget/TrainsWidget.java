@@ -21,7 +21,7 @@ import java.util.Arrays;
  * Created by KKharitonov on 04.01.2016.
  */
 public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    final static private String LOG_TAG = "trainsLogs";
+    final static public String LOG_TAG = "trainsLogs";
 
     private final String UPDATE_ALL_WIDGETS = "update_all_widgets";
     private final String UPDATE_LOCATION = "update_location";
@@ -82,7 +82,6 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
         locationIntent.setAction(UPDATE_LOCATION);
         PendingIntent pLocationIntent = PendingIntent.getBroadcast(context, 0, locationIntent, 0);
         alarmManager.cancel(pLocationIntent);
-
     }
 
     @Override
@@ -101,6 +100,9 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             for (int appWidgetID : ids) {
                 updateWidget(context, appWidgetManager, appWidgetID);
+            }
+            if (lastLocation != null) {
+                new WeatherRequestTask().execute(lastLocation);
             }
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             getLocationApi(context).connect();
@@ -152,6 +154,7 @@ public class TrainsWidget extends AppWidgetProvider implements GoogleApiClient.C
         if (googleApiClient != null) {
             Log.d(LOG_TAG, "googleApiClient.disconnect()");
             googleApiClient.disconnect();
+            googleApiClient = null;
         }
     }
 
