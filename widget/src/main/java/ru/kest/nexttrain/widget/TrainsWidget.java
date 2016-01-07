@@ -6,16 +6,17 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.RemoteViews;
+import ru.kest.nexttrain.widget.services.DataStorage;
 import ru.kest.nexttrain.widget.services.LocationClient;
-import ru.kest.nexttrain.widget.services.WeatherRequestTask;
-import ru.kest.nexttrain.widget.util.Constants;
+import ru.kest.nexttrain.widget.services.TrainSheduleRequestTask;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
 import java.util.Arrays;
+
+import static ru.kest.nexttrain.widget.util.Constants.*;
 
 /**
  * Created by KKharitonov on 04.01.2016.
@@ -66,17 +67,21 @@ public class TrainsWidget extends AppWidgetProvider {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
         Log.d(LOG_TAG, "onReceive: " + intent + " - " + this);
-        if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_ALL_WIDGETS)) {
+        if (intent.getAction().equalsIgnoreCase(UPDATE_ALL_WIDGETS)) {
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             for (int appWidgetID : ids) {
                 updateWidget(context, appWidgetManager, appWidgetID);
             }
-        } else if (intent.getAction().equalsIgnoreCase(Constants.UPDATE_LOCATION)) {
+        } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             new LocationClient(context).connect();
-            if (LocationClient.getLastLocation() != null) {
-                new WeatherRequestTask(context).execute(LocationClient.getLastLocation());
+//            if (LocationClient.getLastLocation() != null) {
+//                new WeatherRequestTask(context).execute(LocationClient.getLastLocation());
+//            }
+        } else if (intent.getAction().equalsIgnoreCase(TRAIN_SCHEDULE_REQUEST)) {
+            if (DataStorage.isSetLastLocation()) {
+                new TrainSheduleRequestTask(context).execute();
             }
         }
     }
@@ -95,14 +100,11 @@ public class TrainsWidget extends AppWidgetProvider {
     }
 
     private String getTextMessage() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-//        return sdf.format(new Date(System.currentTimeMillis()));
-
-        Location lastLocation = LocationClient.getLastLocation();
-        if (lastLocation == null) {
+        if (!DataStorage.isSetLastLocation()) {
             return "Location not found";
         } else {
-            return lastLocation.getLongitude() + ", " + lastLocation.getLatitude();
+//            return lastLocation.getLatitude() + ", " + lastLocation.getLongitude();
+            return "W: " + DataStorage.getDistanceToWork();
         }
     }
 

@@ -20,7 +20,7 @@ public class SchedulerUtil {
                 System.currentTimeMillis()+3000,
                 60000,
                 createBroadcastPI(
-                        context, createUpdateWidgetIntent(context)
+                        context, createIntent(context, UPDATE_ALL_WIDGETS)
                 )
         );
     }
@@ -31,25 +31,30 @@ public class SchedulerUtil {
                 System.currentTimeMillis(),
                 60000,
                 createBroadcastPI(
-                        context, createUpdateLocationIntent(context)
+                        context, createIntent(context, UPDATE_LOCATION)
                 )
         );
     }
 
     public static void sendUpdateWidget(Context context) {
-        Intent intent = createUpdateWidgetIntent(context);
+        Intent intent = createIntent(context, UPDATE_ALL_WIDGETS);
         context.sendBroadcast(intent);
     }
 
     public static void sendUpdateLocation(Context context) {
-        Intent intent = createUpdateLocationIntent(context);
+        Intent intent = createIntent(context, UPDATE_LOCATION);
+        context.sendBroadcast(intent);
+    }
+
+    public static void sendTrainScheduleRequest(Context context) {
+        Intent intent = createIntent(context, TRAIN_SCHEDULE_REQUEST);
         context.sendBroadcast(intent);
     }
 
     public static void cancelScheduleUpdateWidget(Context context, AlarmManager alarmManager) {
         alarmManager.cancel(
                 createBroadcastPI(
-                    context, createUpdateWidgetIntent(context)
+                    context, createIntent(context, UPDATE_ALL_WIDGETS)
                 )
         );
     }
@@ -57,20 +62,14 @@ public class SchedulerUtil {
     public static void cancelScheduleUpdateLocation(Context context, AlarmManager alarmManager) {
         alarmManager.cancel(
                 createBroadcastPI(
-                    context, createUpdateLocationIntent(context)
+                    context, createIntent(context, UPDATE_LOCATION)
                 )
         );
     }
 
-    private static Intent createUpdateWidgetIntent(Context context) {
+    private static Intent createIntent(Context context, String action) {
         Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(UPDATE_ALL_WIDGETS);
-        return intent;
-    }
-
-    private static Intent createUpdateLocationIntent(Context context) {
-        Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(UPDATE_LOCATION);
+        intent.setAction(action);
         return intent;
     }
 
