@@ -1,6 +1,7 @@
 package ru.kest.nexttrain.widget;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -86,21 +88,51 @@ public class TrainsWidget extends AppWidgetProvider {
             }
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             new LocationClient(context).connect();
-//            if (LocationClient.getLastLocation() != null) {
-//                new WeatherRequestTask(context).execute(LocationClient.getLastLocation());
-//            }
         } else if (intent.getAction().equalsIgnoreCase(TRAIN_SCHEDULE_REQUEST)) {
             if (DataStorage.isSetLastLocation()) {
                 new TrainSheduleRequestTask(context).execute();
             }
+        } else if (intent.getAction().equalsIgnoreCase(DELETED_NOTIFICATION)) {
+            Toast.makeText(context, "Notification has been deleted", Toast.LENGTH_LONG).show();
+
         } else if (intent.getAction().equalsIgnoreCase(CREATE_NOTIFICATION)) {
-            Toast.makeText(context, ":: " + intent.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, ":: " + intent.toString(), Toast.LENGTH_LONG).show();
+            if (DataStorage.isSetTrainThreads()) {
+                boolean homeToWork = intent.getBooleanExtra(HOME_TO_WORK, true);
+                int recordId = intent.getIntExtra(RECORD_ID, 0);
+                List<TrainThread> trainThreads = homeToWork ? DataStorage.getTrainsFromHomeToWork() : DataStorage.getTrainsFromWorkToHome();
+                TrainThread thread = trainThreads.get(recordId);
+
+
+                //Comparing dates
+                long diff = Math.abs(thread.getDeparture().getTime() - System.currentTimeMillis());
+                long diffMin = diff / (60 * 1000);
+
+                DateFormat dateFormatter = new SimpleDateFormat("HH:mm");
+                String departTime = dateFormatter.format(thread.getDeparture());
+
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .setContentTitle("Электричка через " + diffMin + " мин")
+                                .setContentText(departTime + " " + thread.getFromName() + " - " + thread.getFromName());
+
+                Intent deleteIntent = new Intent(context, TrainsWidget.class);
+                deleteIntent.setAction(DELETED_NOTIFICATION);
+                PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
+
+                mBuilder.setDeleteIntent(pIntent);
+
+                // отправляем
+                NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                nm.notify(NOTIFICATION_ID, mBuilder.build());
+            }
         }
     }
 
     private void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
-        List<TrainThread> trainThreads = DataStorage.getTrainsFromHomeToWork();
+        List<TrainThread> trainThreads = null;
         Integer indexOfNextTrains = null;
         boolean homeToWork = true;
 
@@ -148,8 +180,9 @@ public class TrainsWidget extends AppWidgetProvider {
                 onClickIntent.setAction(CREATE_NOTIFICATION);
                 onClickIntent.putExtra(HOME_TO_WORK, homeToWork);
                 onClickIntent.putExtra(RECORD_ID, recordIndex);
+                int requestCode = recordIndex + (homeToWork ? 1000 : 0);
 
-                PendingIntent pIntent = PendingIntent.getBroadcast(context, recordIndex + (homeToWork ? 1000 : 0) , onClickIntent, 0);
+                PendingIntent pIntent = PendingIntent.getBroadcast(context, requestCode, onClickIntent, 0);
                 widgetView.setOnClickPendingIntent(layoutId, pIntent);
             }
 

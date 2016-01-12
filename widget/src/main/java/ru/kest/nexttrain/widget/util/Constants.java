@@ -11,9 +11,13 @@ public interface Constants {
     String UPDATE_NEAREST_STATION = "update_nearest_station";
     String TRAIN_SCHEDULE_REQUEST = "TRAIN_SCHEDULE_REQUEST";
     String CREATE_NOTIFICATION = "CREATE_NOTIFICATION";
+    String DELETED_NOTIFICATION = "DELETED_NOTIFICATION";
 
     // Extras
     String HOME_TO_WORK = "HOME_TO_WORK";
     String RECORD_ID = "RECORD_ID";
+
+    // Notification
+    int NOTIFICATION_ID = 1;
 
 }

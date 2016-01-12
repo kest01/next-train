@@ -73,8 +73,8 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
             "  },\n" +
             "  \"threads\": [\n" +
             "    {\n" +
-            "      \"arrival\": \"2016-01-12 15:15:00\",\n" +
-            "      \"departure\": \"2016-01-12 14:15:00\",\n" +
+            "      \"arrival\": \"2016-01-15 15:15:00\",\n" +
+            "      \"departure\": \"2016-01-15 14:15:00\",\n" +
             "      \"duration\": 8100.0,\n" +
             "      \"arrival_terminal\": \"D\",\n" +
             "      \"arrival_platform\": null,\n" +
@@ -119,8 +119,8 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
             "      \"departure_terminal\": null\n" +
             "    },\n" +
             "    {\n" +
-            "      \"arrival\": \"2016-01-12 16:15:00\",\n" +
-            "      \"departure\": \"2016-01-12 15:15:00\",\n" +
+            "      \"arrival\": \"2016-01-15 16:15:00\",\n" +
+            "      \"departure\": \"2016-01-15 15:15:00\",\n" +
             "      \"duration\": 8100.0,\n" +
             "      \"arrival_terminal\": \"D\",\n" +
             "      \"arrival_platform\": null,\n" +
