@@ -1,20 +1,30 @@
 package ru.kest.nexttrain.widget;
 
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
+import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.DataStorage;
 import ru.kest.nexttrain.widget.services.LocationClient;
 import ru.kest.nexttrain.widget.services.TrainSheduleRequestTask;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.ListIterator;
 
 import static ru.kest.nexttrain.widget.util.Constants.*;
 
@@ -83,30 +93,83 @@ public class TrainsWidget extends AppWidgetProvider {
             if (DataStorage.isSetLastLocation()) {
                 new TrainSheduleRequestTask(context).execute();
             }
+        } else if (intent.getAction().equalsIgnoreCase(CREATE_NOTIFICATION)) {
+            Toast.makeText(context, ":: " + intent.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
-    private void updateWidget(Context ctx, AppWidgetManager appWidgetManager, int widgetID) {
-        String outputText = getTextMessage();
+    private void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
-        Log.d(LOG_TAG, "Text: " + outputText);
+        List<TrainThread> trainThreads = DataStorage.getTrainsFromHomeToWork();
+        Integer indexOfNextTrains = null;
+        boolean homeToWork = true;
+
+        if (DataStorage.isSetTrainThreads() && DataStorage.isSetLastLocation()) {
+            if (LocationClient.getNearestStation() == LocationClient.NearestStation.HOME) {
+                trainThreads = DataStorage.getTrainsFromHomeToWork();
+                homeToWork = true;
+            } else {
+                trainThreads = DataStorage.getTrainsFromWorkToHome();
+                homeToWork = false;
+            }
+            indexOfNextTrains = indexOfNextTrains(trainThreads);
+        }
+        Log.d(LOG_TAG, "updateWidget: " + indexOfNextTrains + " : " + trainThreads);
 
         // Помещаем данные в текстовые поля
-        RemoteViews widgetView = new RemoteViews(ctx.getPackageName(), R.layout.widget);
-        widgetView.setTextViewText(R.id.tv, outputText);
+        RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget);
+        Resources res = context.getResources();
+
+        for (int i = 1; i <= 2; i++) {
+            int fromId = res.getIdentifier("from" + i, "id", context.getPackageName());
+            int toId = res.getIdentifier("to" + i, "id", context.getPackageName());
+            int departId = res.getIdentifier("depart" + i, "id", context.getPackageName());
+            int layoutId = res.getIdentifier("ll" + i, "id", context.getPackageName());
+
+            // Clear all field
+            widgetView.setTextViewText(fromId, "");
+            widgetView.setTextViewText(toId, "");
+            widgetView.setTextViewText(departId, "");
+
+            if (indexOfNextTrains != null && (indexOfNextTrains + i) <= trainThreads.size()) {
+                int recordIndex = indexOfNextTrains + i - 1;
+                TrainThread thread = trainThreads.get(recordIndex);
+                Log.d(LOG_TAG, "TrainThread: " + thread);
+                widgetView.setTextViewText(fromId, thread.getFromName());
+                widgetView.setTextViewText(toId, thread.getToName());
+
+                DateFormat dateFormatter = new SimpleDateFormat("HH:mm");
+                String departTime = dateFormatter.format(thread.getDeparture());
+                String arrivalTime = dateFormatter.format(thread.getArrival());
+
+                widgetView.setTextViewText(departId, departTime + " - " + arrivalTime);
+
+                Intent onClickIntent = new Intent(context, TrainsWidget.class);
+                onClickIntent.setAction(CREATE_NOTIFICATION);
+                onClickIntent.putExtra(HOME_TO_WORK, homeToWork);
+                onClickIntent.putExtra(RECORD_ID, recordIndex);
+
+                PendingIntent pIntent = PendingIntent.getBroadcast(context, recordIndex + (homeToWork ? 1000 : 0) , onClickIntent, 0);
+                widgetView.setOnClickPendingIntent(layoutId, pIntent);
+            }
+
+        }
 
         // Обновляем виджет
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }
 
-    private String getTextMessage() {
-        if (!DataStorage.isSetLastLocation()) {
-            return "Location not found";
-        } else {
-//            return lastLocation.getLatitude() + ", " + lastLocation.getLongitude();
-            return "W: " + DataStorage.getDistanceToWork();
+    @Nullable
+    private Integer indexOfNextTrains(List<TrainThread> trainThreads) {
+        Date now = new Date();
+        ListIterator<TrainThread> iterator = trainThreads.listIterator();
+        while (iterator.hasNext()) {
+            TrainThread thread = iterator.next();
+            if (thread.getDeparture().compareTo(now) > 0) {
+                return iterator.previousIndex();
+            }
         }
+        return null;
     }
-
 
 }

@@ -1,17 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-    <TextView
-            android:id="@+id/tv"
-            android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:divider="?android:dividerVertical"
+        android:showDividers="middle"
+        android:background="#6661aaff">
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="#6661aaff"
-            android:gravity="center"
-            android:text="@string/widget_text"
-            android:textColor="#000"
-            android:textSize="12sp">
-    </TextView>
-</RelativeLayout>
+            android:id="@+id/ll1"
+            android:layout_margin="1dp">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Нахабино"
+                android:id="@+id/from1" android:textSize="6pt"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to1" android:textSize="6pt"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13:15"
+                android:id="@+id/depart1" android:textSize="6pt" android:textStyle="bold"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/ll2"
+            android:layout_margin="1dp">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Нахабино"
+                android:id="@+id/from2" android:textSize="6pt"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to2" android:textSize="6pt"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13:15"
+                android:id="@+id/depart2" android:textSize="6pt" android:textStyle="bold"/>
+    </LinearLayout>
+</LinearLayout>

@@ -11,6 +11,9 @@ public class TrainThread {
     private Date departure;
     private String fromCode;
     private String toCode;
+    private String fromName;
+    private String toName;
+    private String title;
 
     public Date getArrival() {
         return arrival;
@@ -42,5 +45,42 @@ public class TrainThread {
 
     public void setToCode(String toCode) {
         this.toCode = toCode;
+    }
+
+    public String getFromName() {
+        return fromName;
+    }
+
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
+    }
+
+    public String getToName() {
+        return toName;
+    }
+
+    public void setToName(String toName) {
+        this.toName = toName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public String toString() {
+        return "TrainThread{" +
+                "arrival=" + arrival +
+                ", departure=" + departure +
+                ", fromCode='" + fromCode + '\'' +
+                ", toCode='" + toCode + '\'' +
+                ", fromName='" + fromName + '\'' +
+                ", toName='" + toName + '\'' +
+                ", title='" + title + '\'' +
+                '}';
     }
 }

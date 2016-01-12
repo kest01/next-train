@@ -10,25 +10,29 @@ import java.util.List;
  */
 public class DataStorage {
 
-    private static List<TrainThread> trainThreads;
+    private static List<TrainThread> trainsFromHomeToWork;
+    private static List<TrainThread> trainsFromWorkToHome;
     private static Location lastLocation;
 
-    private static final Location homeLocation = new Location("");
-    private static final Location workLocation = new Location("");
-    {
-        homeLocation.setLatitude(55.8300989);
-        homeLocation.setLongitude(37.2187062);
-
-        workLocation.setLatitude(55.802753);
-        workLocation.setLongitude(37.491259);
+    public static List<TrainThread> getTrainsFromHomeToWork() {
+        return trainsFromHomeToWork;
     }
 
-    public static List<TrainThread> getTrainThreads() {
-        return trainThreads;
+    public static void setTrainsFromHomeToWork(List<TrainThread> trainsFromHomeToWork) {
+        DataStorage.trainsFromHomeToWork = trainsFromHomeToWork;
     }
 
-    public static void setTrainThreads(List<TrainThread> trainThreads) {
-        DataStorage.trainThreads = trainThreads;
+    public static boolean isSetTrainThreads() {
+        return trainsFromHomeToWork != null && trainsFromHomeToWork.size() > 0
+                && trainsFromWorkToHome != null && trainsFromWorkToHome.size() > 0;
+    }
+
+    public static List<TrainThread> getTrainsFromWorkToHome() {
+        return trainsFromWorkToHome;
+    }
+
+    public static void setTrainsFromWorkToHome(List<TrainThread> trainsFromWorkToHome) {
+        DataStorage.trainsFromWorkToHome = trainsFromWorkToHome;
     }
 
     public static Location getLastLocation() {
@@ -41,20 +45,6 @@ public class DataStorage {
 
     public static void setLastLocation(Location lastLocation) {
         DataStorage.lastLocation = lastLocation;
-    }
-
-    public static int getDistanceToWork() {
-        if (lastLocation != null) {
-            return (int) workLocation.distanceTo(lastLocation);
-        }
-        return 0;
-    }
-
-    public static int getDistanceToHome() {
-        if (lastLocation != null) {
-            return (int) homeLocation.distanceTo(lastLocation);
-        }
-        return 0;
     }
 
 

@@ -43,7 +43,9 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
             if (response != null && response.getThreads() != null && response.getThreads().size() > 0) {
                 List<TrainThread> trainThreads = YandexToDomainConverter.scheduleResponseToDomain(response);
-                DataStorage.setTrainThreads(trainThreads);
+                DataStorage.setTrainsFromHomeToWork(trainThreads);
+                DataStorage.setTrainsFromWorkToHome(trainThreads);
+                Log.d(LOG_TAG, "TrainThreads" + trainThreads);
             }
 
             SchedulerUtil.sendUpdateWidget(context);
@@ -62,88 +64,123 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
 
     private static final String MOCK_JSON = "{\n" +
-            "  \"pagination\":\n" +
-            "  {\n" +
-            "    \"has_next\":false,\n" +
-            "    \"per_page\":100,\n" +
-            "    \"page_count\":1,\n" +
-            "    \"total\":9,\n" +
-            "    \"page\":1\n" +
+            "  \"pagination\": {\n" +
+            "    \"has_next\": false,\n" +
+            "    \"per_page\": 100,\n" +
+            "    \"page_count\": 1,\n" +
+            "    \"total\": 9,\n" +
+            "    \"page\": 1\n" +
             "  },\n" +
-            "  \"threads\":\n" +
-            "  [\n" +
+            "  \"threads\": [\n" +
             "    {\n" +
-            "      \"arrival\":\"2014-03-28 10:15:00\",\n" +
-            "      \"duration\":8100.0,\n" +
-            "      \"arrival_terminal\":\"D\",\n" +
-            "      \"arrival_platform\":null,\n" +
-            "      \"from\":\n" +
-            "      {\n" +
-            "        \"code\":\"s9600396\",\n" +
-            "        \"station_type\":\"аэропорт\",\n" +
-            "        \"title\":\"Симферополь\",\n" +
-            "        \"popular_title\":\"\",\n" +
-            "        \"short_title\":\"\",\n" +
-            "        \"transport_type\":\"plane\",\n" +
-            "        \"type\":\"station\"\n" +
+            "      \"arrival\": \"2016-01-12 15:15:00\",\n" +
+            "      \"departure\": \"2016-01-12 14:15:00\",\n" +
+            "      \"duration\": 8100.0,\n" +
+            "      \"arrival_terminal\": \"D\",\n" +
+            "      \"arrival_platform\": null,\n" +
+            "      \"from\": {\n" +
+            "        \"code\": \"s9600396\",\n" +
+            "        \"station_type\": \"аэропорт\",\n" +
+            "        \"title\": \"Симферополь\",\n" +
+            "        \"popular_title\": \"\",\n" +
+            "        \"short_title\": \"\",\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"type\": \"station\"\n" +
             "      },\n" +
-            "      \"thread\":\n" +
-            "      {\n" +
-            "        \"carrier\":\n" +
-            "        {\n" +
-            "          \"title\":\"Аэрофлот\",\n" +
-            "          \"code\":26,\n" +
-            "          \"codes\":\n" +
-            "          {\n" +
-            "            \"icao\":null,\n" +
-            "            \"sirena\":\"СУ\",\n" +
-            "            \"iata\":\"SU\"\n" +
+            "      \"thread\": {\n" +
+            "        \"carrier\": {\n" +
+            "          \"title\": \"Аэрофлот\",\n" +
+            "          \"code\": 26,\n" +
+            "          \"codes\": {\n" +
+            "            \"icao\": null,\n" +
+            "            \"sirena\": \"СУ\",\n" +
+            "            \"iata\": \"SU\"\n" +
             "          }\n" +
             "        },\n" +
-            "        \"transport_type\":\"plane\",\n" +
-            "        \"uid\":\"SU-1827A_c26_agent\",\n" +
-            "        \"title\":\"Симферополь - Москва\",\n" +
-            "        \"vehicle\":\"Airbus А320\",\n" +
-            "        \"number\":\"SU 1827\",\n" +
-            "        \"short_title\":\"Симферополь - Москва\",\n" +
-            "        \"express_type\":null\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"uid\": \"SU-1827A_c26_agent\",\n" +
+            "        \"title\": \"Симферополь - Москва\",\n" +
+            "        \"vehicle\": \"Airbus А320\",\n" +
+            "        \"number\": \"SU 1827\",\n" +
+            "        \"short_title\": \"Симферополь - Москва\",\n" +
+            "        \"express_type\": null\n" +
             "      },\n" +
-            "      \"departure_platform\":null,\n" +
-            "      \"departure\":\"2014-03-28 06:00:00\",\n" +
-            "      \"stops\":\"\",\n" +
-            "      \"to\":\n" +
-            "      {\n" +
-            "        \"code\":\"s9600213\",\n" +
-            "        \"station_type\":\"аэропорт\",\n" +
-            "        \"title\":\"Шереметьево\",\n" +
-            "        \"popular_title\":\"\",\n" +
-            "        \"short_title\":\"\",\n" +
-            "        \"transport_type\":\"plane\",\n" +
-            "        \"type\":\"station\"\n" +
+            "      \"departure_platform\": null,\n" +
+            "      \"stops\": \"\",\n" +
+            "      \"to\": {\n" +
+            "        \"code\": \"s9600213\",\n" +
+            "        \"station_type\": \"аэропорт\",\n" +
+            "        \"title\": \"Шереметьево\",\n" +
+            "        \"popular_title\": \"\",\n" +
+            "        \"short_title\": \"\",\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"type\": \"station\"\n" +
+            "      },\n" +
+            "      \"departure_terminal\": null\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"arrival\": \"2016-01-12 16:15:00\",\n" +
+            "      \"departure\": \"2016-01-12 15:15:00\",\n" +
+            "      \"duration\": 8100.0,\n" +
+            "      \"arrival_terminal\": \"D\",\n" +
+            "      \"arrival_platform\": null,\n" +
+            "      \"from\": {\n" +
+            "        \"code\": \"s9600396\",\n" +
+            "        \"station_type\": \"аэропорт\",\n" +
+            "        \"title\": \"Симферополь\",\n" +
+            "        \"popular_title\": \"\",\n" +
+            "        \"short_title\": \"\",\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"type\": \"station\"\n" +
+            "      },\n" +
+            "      \"thread\": {\n" +
+            "        \"carrier\": {\n" +
+            "          \"title\": \"Аэрофлот\",\n" +
+            "          \"code\": 26,\n" +
+            "          \"codes\": {\n" +
+            "            \"icao\": null,\n" +
+            "            \"sirena\": \"СУ\",\n" +
+            "            \"iata\": \"SU\"\n" +
+            "          }\n" +
+            "        },\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"uid\": \"SU-1827A_c26_agent\",\n" +
+            "        \"title\": \"Симферополь - Москва\",\n" +
+            "        \"vehicle\": \"Airbus А320\",\n" +
+            "        \"number\": \"SU 1827\",\n" +
+            "        \"short_title\": \"Симферополь - Москва\",\n" +
+            "        \"express_type\": null\n" +
+            "      },\n" +
+            "      \"departure_platform\": null,\n" +
+            "      \"stops\": \"\",\n" +
+            "      \"to\": {\n" +
+            "        \"code\": \"s9600213\",\n" +
+            "        \"station_type\": \"аэропорт\",\n" +
+            "        \"title\": \"Шереметьево\",\n" +
+            "        \"popular_title\": \"\",\n" +
+            "        \"short_title\": \"\",\n" +
+            "        \"transport_type\": \"plane\",\n" +
+            "        \"type\": \"station\"\n" +
             "      },\n" +
             "      \"departure_terminal\": null\n" +
             "    }\n" +
             "  ],\n" +
-            "  \"search\":\n" +
-            "  {\n" +
-            "    \"date\":\"2015-09-02\",\n" +
-            "    \"to\":\n" +
-            "    {\n" +
-            "      \"code\":\"c213\",\n" +
-            "      \"type\":\"settlement\",\n" +
-            "      \"popular_title\":\"Москва\",\n" +
-            "      \"short_title\":\"Москва\",\n" +
-            "      \"title\":\"Москва\"\n" +
+            "  \"search\": {\n" +
+            "    \"date\": \"2015-09-02\",\n" +
+            "    \"to\": {\n" +
+            "      \"code\": \"c213\",\n" +
+            "      \"type\": \"settlement\",\n" +
+            "      \"popular_title\": \"Москва\",\n" +
+            "      \"short_title\": \"Москва\",\n" +
+            "      \"title\": \"Москва\"\n" +
             "    },\n" +
-            "    \"from\":\n" +
-            "    {\n" +
-            "      \"code\":\"c146\",\n" +
-            "      \"type\":\"settlement\",\n" +
-            "      \"popular_title\":\"Симферополь\",\n" +
-            "      \"short_title\":\"Симферополь\",\n" +
-            "      \"title\":\"Симферополь\"\n" +
+            "    \"from\": {\n" +
+            "      \"code\": \"c146\",\n" +
+            "      \"type\": \"settlement\",\n" +
+            "      \"popular_title\": \"Симферополь\",\n" +
+            "      \"short_title\": \"Симферополь\",\n" +
+            "      \"title\": \"Симферополь\"\n" +
             "    }\n" +
             "  }\n" +
             "}";
-
 }

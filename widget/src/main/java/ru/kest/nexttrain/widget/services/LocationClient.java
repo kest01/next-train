@@ -16,6 +16,16 @@ import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
  */
 public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    private static final Location homeLocation = new Location("");
+    private static final Location workLocation = new Location("");
+    {
+        homeLocation.setLatitude(55.8300989);
+        homeLocation.setLongitude(37.2187062);
+
+        workLocation.setLatitude(55.802753);
+        workLocation.setLongitude(37.491259);
+    }
+
     private GoogleApiClient googleApiClient;
 
     public LocationClient(Context context) {
@@ -25,6 +35,31 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+    }
+
+    private static int getDistanceToWork() {
+        if (DataStorage.isSetLastLocation()) {
+            return Math.round(workLocation.distanceTo(DataStorage.getLastLocation()));
+        }
+        return 0;
+    }
+
+    private static int getDistanceToHome() {
+        if (DataStorage.isSetLastLocation()) {
+            return Math.round(homeLocation.distanceTo(DataStorage.getLastLocation()));
+        }
+        return 0;
+    }
+
+    public static NearestStation getNearestStation() {
+        if (DataStorage.isSetLastLocation()) {
+            if (getDistanceToHome() < getDistanceToWork()) {
+                return NearestStation.HOME;
+            } else if (getDistanceToWork() < getDistanceToHome()) {
+                return NearestStation.WORK;
+            }
+        }
+        return null;
     }
 
     public void connect() {
@@ -60,5 +95,10 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
             Log.d(LOG_TAG, "lastLocation has not changed");
         }
         return false;
+    }
+
+    public enum NearestStation {
+        HOME,
+        WORK;
     }
 }

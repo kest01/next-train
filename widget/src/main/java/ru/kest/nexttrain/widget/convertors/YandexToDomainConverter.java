@@ -21,7 +21,11 @@ public class YandexToDomainConverter {
                 threadDomain.setArrival(threadYandex.getArrival());
                 threadDomain.setDeparture(threadYandex.getDeparture());
                 threadDomain.setFromCode(threadYandex.getFrom().getCode());
+                threadDomain.setFromName(threadYandex.getFrom().getTitle());
                 threadDomain.setToCode(threadYandex.getTo().getCode());
+                threadDomain.setToName(threadYandex.getTo().getTitle());
+                threadDomain.setTitle(threadYandex.getThread().getTitle());
+                result.add(threadDomain);
             }
             Collections.sort(result, new Comparator<TrainThread>() {
                 @Override

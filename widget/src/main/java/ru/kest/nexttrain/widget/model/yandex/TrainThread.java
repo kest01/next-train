@@ -16,6 +16,9 @@ public class TrainThread {
     private Station from;
     private Station to;
 
+    private Thread thread;
+
+
     public Date getArrival() {
         return arrival;
     }
@@ -56,6 +59,14 @@ public class TrainThread {
         this.to = to;
     }
 
+    public Thread getThread() {
+        return thread;
+    }
+
+    public void setThread(Thread thread) {
+        this.thread = thread;
+    }
+
     @Override
     public String toString() {
         return "TrainThread{" +
@@ -64,6 +75,7 @@ public class TrainThread {
                 ", duration=" + duration +
                 ", from=" + from +
                 ", to=" + to +
+                ", thread=" + thread +
                 '}';
     }
 }

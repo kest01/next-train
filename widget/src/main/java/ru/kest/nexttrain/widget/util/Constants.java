@@ -5,9 +5,15 @@ package ru.kest.nexttrain.widget.util;
  */
 public interface Constants {
 
+    // Actions
     String UPDATE_ALL_WIDGETS = "update_all_widgets";
     String UPDATE_LOCATION = "update_location";
     String UPDATE_NEAREST_STATION = "update_nearest_station";
     String TRAIN_SCHEDULE_REQUEST = "TRAIN_SCHEDULE_REQUEST";
+    String CREATE_NOTIFICATION = "CREATE_NOTIFICATION";
+
+    // Extras
+    String HOME_TO_WORK = "HOME_TO_WORK";
+    String RECORD_ID = "RECORD_ID";
 
 }
