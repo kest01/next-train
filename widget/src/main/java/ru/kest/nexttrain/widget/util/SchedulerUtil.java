@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import ru.kest.nexttrain.widget.TrainsWidget;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import static ru.kest.nexttrain.widget.util.Constants.*;
 
 /**
@@ -15,10 +18,15 @@ public class SchedulerUtil {
 
 
     public static void scheduleUpdateWidget(Context context, AlarmManager alarmManager) {
-        alarmManager.setRepeating(
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MINUTE, 1);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        alarmManager.set(
                 AlarmManager.RTC,
-                System.currentTimeMillis()+3000,
-                60000,
+                calendar.getTimeInMillis(),
                 createBroadcastPI(
                         context, createIntent(context, UPDATE_ALL_WIDGETS)
                 )
@@ -29,7 +37,7 @@ public class SchedulerUtil {
         alarmManager.setRepeating(
                 AlarmManager.RTC,
                 System.currentTimeMillis(),
-                60000,
+                60 * 60 * 1000,
                 createBroadcastPI(
                         context, createIntent(context, UPDATE_LOCATION)
                 )

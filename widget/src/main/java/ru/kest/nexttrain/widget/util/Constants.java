@@ -16,6 +16,7 @@ public interface Constants {
     // Extras
     String HOME_TO_WORK = "HOME_TO_WORK";
     String RECORD_ID = "RECORD_ID";
+    String DETAILS = "DETAILS";
 
     // Notification
     int NOTIFICATION_ID = 1;

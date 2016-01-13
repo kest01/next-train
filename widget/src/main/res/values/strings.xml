@@ -3,4 +3,8 @@
     <string name="widget_name">Расписание электричек</string>
     <string name="widget_text">Текст на виджете</string>
     <string name="google_app_id">AIzaSyADFp1kzvAZnBh08Wst-aFtXUwEnLiG-Dk</string>
+    <string name="title_activity_pop_up">PopUpActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

@@ -13,6 +13,7 @@ public class DataStorage {
     private static List<TrainThread> trainsFromHomeToWork;
     private static List<TrainThread> trainsFromWorkToHome;
     private static Location lastLocation;
+    private static TrainThread notificationTrain;
 
     public static List<TrainThread> getTrainsFromHomeToWork() {
         return trainsFromHomeToWork;
@@ -47,5 +48,15 @@ public class DataStorage {
         DataStorage.lastLocation = lastLocation;
     }
 
+    public static TrainThread getNotificationTrain() {
+        return notificationTrain;
+    }
 
+    public static void setNotificationTrain(TrainThread notificationTrain) {
+        DataStorage.notificationTrain = notificationTrain;
+    }
+
+    public static boolean isSetNotificationTrain() {
+        return notificationTrain != null;
+    }
 }

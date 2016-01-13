@@ -1,7 +1,6 @@
 package ru.kest.nexttrain.widget;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -11,14 +10,15 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import ru.kest.nexttrain.PopUpActivity;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.DataStorage;
 import ru.kest.nexttrain.widget.services.LocationClient;
 import ru.kest.nexttrain.widget.services.TrainSheduleRequestTask;
+import ru.kest.nexttrain.widget.util.NotificationUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
 import java.text.DateFormat;
@@ -44,7 +44,8 @@ public class TrainsWidget extends AppWidgetProvider {
         Log.d(LOG_TAG, "onEnabled");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-//        SchedulerUtil.scheduleUpdateWidget(context, alarmManager);
+        SchedulerUtil.sendUpdateLocation(context);
+        SchedulerUtil.scheduleUpdateWidget(context, alarmManager);
         SchedulerUtil.scheduleUpdateLocation(context, alarmManager);
     }
 
@@ -53,10 +54,21 @@ public class TrainsWidget extends AppWidgetProvider {
                          int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d(LOG_TAG, "onUpdate " + Arrays.toString(appWidgetIds));
-        SchedulerUtil.sendUpdateLocation(context);
-/*        for (int id : appWidgetIds) {
+//        SchedulerUtil.sendUpdateLocation(context);
+        updateWidgets(context, appWidgetManager, appWidgetIds);
+    }
+
+    private void updateWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        for (int id : appWidgetIds) {
             updateWidget(context, appWidgetManager, id);
-        }*/
+        }
+
+        NotificationUtil.createOrUpdateNotification(context);
+        if (!DataStorage.isSetTrainThreads()) {
+            SchedulerUtil.sendUpdateLocation(context);
+        }
+        SchedulerUtil.scheduleUpdateWidget(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE));
+        Toast.makeText(context, "updateWidget", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -65,7 +77,7 @@ public class TrainsWidget extends AppWidgetProvider {
         Log.d(LOG_TAG, "onDeleted " + Arrays.toString(appWidgetIds));
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        SchedulerUtil.cancelScheduleUpdateWidget(context, alarmManager);
+        SchedulerUtil.cancelScheduleUpdateWidget(context, alarmManager);
         SchedulerUtil.cancelScheduleUpdateLocation(context, alarmManager);
     }
 
@@ -83,9 +95,7 @@ public class TrainsWidget extends AppWidgetProvider {
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-            for (int appWidgetID : ids) {
-                updateWidget(context, appWidgetManager, appWidgetID);
-            }
+            updateWidgets(context, appWidgetManager, ids);
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             new LocationClient(context).connect();
         } else if (intent.getAction().equalsIgnoreCase(TRAIN_SCHEDULE_REQUEST)) {
@@ -94,6 +104,7 @@ public class TrainsWidget extends AppWidgetProvider {
             }
         } else if (intent.getAction().equalsIgnoreCase(DELETED_NOTIFICATION)) {
             Toast.makeText(context, "Notification has been deleted", Toast.LENGTH_LONG).show();
+            DataStorage.setNotificationTrain(null);
 
         } else if (intent.getAction().equalsIgnoreCase(CREATE_NOTIFICATION)) {
 //            Toast.makeText(context, ":: " + intent.toString(), Toast.LENGTH_LONG).show();
@@ -102,30 +113,9 @@ public class TrainsWidget extends AppWidgetProvider {
                 int recordId = intent.getIntExtra(RECORD_ID, 0);
                 List<TrainThread> trainThreads = homeToWork ? DataStorage.getTrainsFromHomeToWork() : DataStorage.getTrainsFromWorkToHome();
                 TrainThread thread = trainThreads.get(recordId);
+                DataStorage.setNotificationTrain(thread);
 
-
-                //Comparing dates
-                long diff = Math.abs(thread.getDeparture().getTime() - System.currentTimeMillis());
-                long diffMin = diff / (60 * 1000);
-
-                DateFormat dateFormatter = new SimpleDateFormat("HH:mm");
-                String departTime = dateFormatter.format(thread.getDeparture());
-
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentTitle("Электричка через " + diffMin + " мин")
-                                .setContentText(departTime + " " + thread.getFromName() + " - " + thread.getFromName());
-
-                Intent deleteIntent = new Intent(context, TrainsWidget.class);
-                deleteIntent.setAction(DELETED_NOTIFICATION);
-                PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
-
-                mBuilder.setDeleteIntent(pIntent);
-
-                // отправляем
-                NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                nm.notify(NOTIFICATION_ID, mBuilder.build());
+                NotificationUtil.createOrUpdateNotification(context);
             }
         }
     }
@@ -166,7 +156,7 @@ public class TrainsWidget extends AppWidgetProvider {
             if (indexOfNextTrains != null && (indexOfNextTrains + i) <= trainThreads.size()) {
                 int recordIndex = indexOfNextTrains + i - 1;
                 TrainThread thread = trainThreads.get(recordIndex);
-                Log.d(LOG_TAG, "TrainThread: " + thread);
+//                Log.d(LOG_TAG, "TrainThread: " + thread);
                 widgetView.setTextViewText(fromId, thread.getFromName());
                 widgetView.setTextViewText(toId, thread.getToName());
 
@@ -176,13 +166,16 @@ public class TrainsWidget extends AppWidgetProvider {
 
                 widgetView.setTextViewText(departId, departTime + " - " + arrivalTime);
 
-                Intent onClickIntent = new Intent(context, TrainsWidget.class);
-                onClickIntent.setAction(CREATE_NOTIFICATION);
-                onClickIntent.putExtra(HOME_TO_WORK, homeToWork);
-                onClickIntent.putExtra(RECORD_ID, recordIndex);
+//                Intent onClickIntent = new Intent(context, TrainsWidget.class);
+                Intent popUpIntent = new Intent(context, PopUpActivity.class);
+                popUpIntent.setAction(CREATE_NOTIFICATION);
+                popUpIntent.putExtra(HOME_TO_WORK, homeToWork);
+                popUpIntent.putExtra(RECORD_ID, recordIndex);
+                popUpIntent.putExtra(DETAILS, departTime + " " + thread.getFromName() + " - " + thread.getToName());
+                popUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 int requestCode = recordIndex + (homeToWork ? 1000 : 0);
 
-                PendingIntent pIntent = PendingIntent.getBroadcast(context, requestCode, onClickIntent, 0);
+                PendingIntent pIntent = PendingIntent.getActivity(context, requestCode, popUpIntent, 0);
                 widgetView.setOnClickPendingIntent(layoutId, pIntent);
             }
 
