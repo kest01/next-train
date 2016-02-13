@@ -13,4 +13,8 @@ public class TrainThread {
     private Date arrival;
     private Date departure;
     private String title;
+
+    private String from;
+    private String to;
+
 }

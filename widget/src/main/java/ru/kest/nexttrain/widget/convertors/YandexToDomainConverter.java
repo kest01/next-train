@@ -21,6 +21,12 @@ public class YandexToDomainConverter {
                 domainThread.setArrival(yandexThread.getArrival());
                 domainThread.setDeparture(yandexThread.getDeparture());
                 domainThread.setTitle(yandexThread.getThread().getShortTitle());
+
+                if (yandexThread.getThread().getShortTitle() != null) {
+                    String[] stations = yandexThread.getThread().getShortTitle().split(" - ");
+                    domainThread.setFrom(stations[0]);
+                    domainThread.setTo(stations[1]);
+                }
                 result.add(domainThread);
             }
             Collections.sort(result, new Comparator<TrainThread>() {

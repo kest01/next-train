@@ -91,9 +91,7 @@ public class TrainsWidget extends AppWidgetProvider {
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             new LocationClient(context).connect();
         } else if (intent.getAction().equalsIgnoreCase(TRAIN_SCHEDULE_REQUEST)) {
-            if (DataStorage.isSetLastLocation()) {
-                new TrainSheduleRequestTask(context).execute();
-            }
+            new TrainSheduleRequestTask(context).execute();
         } else if (intent.getAction().equalsIgnoreCase(DELETED_NOTIFICATION)) {
             Toast.makeText(context, "Notification has been deleted", Toast.LENGTH_LONG).show();
             DataStorage.setNotificationTrain(null);

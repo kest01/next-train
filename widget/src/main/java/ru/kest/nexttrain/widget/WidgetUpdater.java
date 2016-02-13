@@ -28,6 +28,8 @@ import static ru.kest.nexttrain.widget.util.Constants.RECORD_HASH;
  */
 public class WidgetUpdater {
 
+    private static final int ELEMENT_COUNT = 4;
+
     public static void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
         List<TrainThread> trainThreads = null;
@@ -47,22 +49,24 @@ public class WidgetUpdater {
         RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget);
         Resources res = context.getResources();
 
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= ELEMENT_COUNT; i++) {
             int timeId = res.getIdentifier("time" + i, "id", context.getPackageName());
-            int threadTitleId = res.getIdentifier("threadTitle" + i, "id", context.getPackageName());
+            int fromId = res.getIdentifier("from" + i, "id", context.getPackageName());
+            int toId = res.getIdentifier("to" + i, "id", context.getPackageName());
             int layoutId = res.getIdentifier("ll" + i, "id", context.getPackageName());
 
             // Clear all field
             widgetView.setTextViewText(timeId, "");
-            widgetView.setTextViewText(threadTitleId, "");
+            widgetView.setTextViewText(fromId, "");
+            widgetView.setTextViewText(toId, "");
 
             if (indexOfNextTrains != null && (indexOfNextTrains + i) <= trainThreads.size()) {
                 int recordIndex = indexOfNextTrains + i - 1;
                 TrainThread thread = trainThreads.get(recordIndex);
 
-                widgetView.setTextViewText(timeId,
-                        DateUtil.getTime(thread.getDeparture()) + " - " + DateUtil.getTime(thread.getArrival()));
-                widgetView.setTextViewText(threadTitleId, thread.getTitle());
+                widgetView.setTextViewText(timeId, DateUtil.getTime(thread.getDeparture()) + " - " + DateUtil.getTime(thread.getArrival()));
+                widgetView.setTextViewText(fromId, thread.getFrom());
+                widgetView.setTextViewText(toId, thread.getTo());
 
                 widgetView.setOnClickPendingIntent(layoutId, createPopUpDialogPendingIntent(context, thread));
             }

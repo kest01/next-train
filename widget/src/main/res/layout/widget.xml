@@ -9,7 +9,7 @@
         android:background="#6661aaff">
     <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="81dp"
             android:layout_height="match_parent"
             android:id="@+id/ll1"
             android:layout_margin="1dp">
@@ -17,28 +17,86 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="13:15 - 13:14"
-                android:id="@+id/time1" android:textSize="6pt" android:textStyle="bold"/>
+                android:id="@+id/time1" android:textSize="6pt" android:textStyle="bold"
+                android:layout_gravity="center_horizontal"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Нахабино - Аникеевка"
-                android:id="@+id/threadTitle1" android:textSize="6pt"/>
+                android:text="Нахабино"
+                android:id="@+id/from1" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to1" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="81dp"
             android:layout_height="match_parent"
             android:id="@+id/ll2"
             android:layout_margin="1dp">
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="13:15"
-                android:id="@+id/time2" android:textSize="6pt" android:textStyle="bold"/>
+                android:text="13:15 - 13:14"
+                android:id="@+id/time2" android:textSize="6pt" android:layout_gravity="center_horizontal"
+                android:textStyle="bold"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Нахабино - Аникеевка"
-                android:id="@+id/threadTitle2" android:textSize="6pt"/>
+                android:text="Нахабино"
+                android:id="@+id/from2" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to2" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="81dp"
+            android:layout_height="match_parent"
+            android:id="@+id/ll3"
+            android:layout_margin="1dp">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13:15 - 13:14"
+                android:id="@+id/time3" android:textSize="6pt" android:layout_gravity="center_horizontal"
+                android:textStyle="bold"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Нахабино"
+                android:id="@+id/from3" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to3" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="81dp"
+            android:layout_height="match_parent"
+            android:id="@+id/ll4"
+            android:layout_margin="1dp">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13:15-13:14"
+                android:id="@+id/time4" android:textSize="6pt" android:layout_gravity="center_horizontal"
+                android:textStyle="bold"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Нахабино"
+                android:id="@+id/from4" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Аникеевка"
+                android:id="@+id/to4" android:textSize="6pt" android:layout_gravity="center_horizontal"/>
     </LinearLayout>
 </LinearLayout>
