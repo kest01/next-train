@@ -69,7 +69,7 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "onConnected: " + googleApiClient);
         if (updateLastLocation()) {
-            SchedulerUtil.sendTrainScheduleRequest(googleApiClient.getContext());
+            SchedulerUtil.sendUpdateWidget(googleApiClient.getContext());
         }
         Log.d(LOG_TAG, "googleApiClient.disconnect()");
         googleApiClient.disconnect();
@@ -88,12 +88,18 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
 
     private boolean updateLastLocation() {
         Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if( location != null ){
-            DataStorage.setLastLocation(location);
-            return true;
-        } else {
-            Log.d(LOG_TAG, "lastLocation has not changed");
+        if(location != null){
+            if (DataStorage.isSetLastLocation()) {
+                if (workLocation.distanceTo(DataStorage.getLastLocation()) > 500) { // difference more then 500 meters
+                    DataStorage.setLastLocation(location);
+                    return true;
+                }
+            } else {
+                DataStorage.setLastLocation(location);
+                return true;
+            }
         }
+        Log.d(LOG_TAG, "lastLocation has not changed");
         return false;
     }
 

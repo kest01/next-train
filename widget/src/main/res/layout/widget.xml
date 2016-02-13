@@ -16,18 +16,13 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Нахабино"
-                android:id="@+id/from1" android:textSize="6pt"/>
+                android:text="13:15 - 13:14"
+                android:id="@+id/time1" android:textSize="6pt" android:textStyle="bold"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Аникеевка"
-                android:id="@+id/to1" android:textSize="6pt"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="13:15"
-                android:id="@+id/depart1" android:textSize="6pt" android:textStyle="bold"/>
+                android:text="Нахабино - Аникеевка"
+                android:id="@+id/threadTitle1" android:textSize="6pt"/>
     </LinearLayout>
     <LinearLayout
             android:orientation="vertical"
@@ -38,17 +33,12 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Нахабино"
-                android:id="@+id/from2" android:textSize="6pt"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Аникеевка"
-                android:id="@+id/to2" android:textSize="6pt"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="13:15"
-                android:id="@+id/depart2" android:textSize="6pt" android:textStyle="bold"/>
+                android:id="@+id/time2" android:textSize="6pt" android:textStyle="bold"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Нахабино - Аникеевка"
+                android:id="@+id/threadTitle2" android:textSize="6pt"/>
     </LinearLayout>
 </LinearLayout>

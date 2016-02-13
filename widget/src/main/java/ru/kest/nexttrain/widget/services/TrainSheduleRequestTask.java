@@ -1,5 +1,6 @@
 package ru.kest.nexttrain.widget.services;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -7,11 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
-import ru.kest.nexttrain.widget.model.yandex.TrainScheduleResponse;
+import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
-import java.text.DateFormat;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
@@ -21,10 +26,15 @@ import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
  */
 public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
-    private static final String URL = "https://api.rasp.yandex.net/v1.0/search/?apikey={ключ}&format=json&from=c146&to=c213&lang=ru&page=1&date=2015-09-02";
+    private static final String URL_TEMPLATE = "https://api.rasp.yandex.net/v1.0/search/?apikey=4616c13e-bcc2-49e3-b88a-5a1437ea7a40&format=json&from=%s&to=%s&lang=ru&date=%s";
+    private static final String HOME_STATION_CODE = "s9601770";
+    private static final String WORK_STATION_CODE = "s9601251";
 
+    private static final String SUCCESS_RESPONSE = "OK";
 
     private Context context;
+
+    private ObjectMapper mapper = getJsonMapper();
 
     public TrainSheduleRequestTask(Context context) {
         this.context = context;
@@ -34,22 +44,20 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         Log.d(LOG_TAG, "TrainSheduleRequestTask.doInBackground()");
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            mapper.setDateFormat(df);
-            mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
-            TrainScheduleResponse response = mapper.readValue(MOCK_JSON, TrainScheduleResponse.class);
-            Log.i(LOG_TAG, response.toString());
+            List<TrainThread> fromHomeTrains = loadTrainSchedule(true);
+            if (!fromHomeTrains.isEmpty()) {
+                DataStorage.setTrainsFromHomeToWork(fromHomeTrains);
+                Log.d(LOG_TAG, "fromHomeTrains: " + fromHomeTrains);
+            }
 
-            if (response != null && response.getThreads() != null && response.getThreads().size() > 0) {
-                List<TrainThread> trainThreads = YandexToDomainConverter.scheduleResponseToDomain(response);
-                DataStorage.setTrainsFromHomeToWork(trainThreads);
-                DataStorage.setTrainsFromWorkToHome(trainThreads);
-                Log.d(LOG_TAG, "TrainThreads" + trainThreads);
+            List<TrainThread> fromWorkTrains = loadTrainSchedule(false);
+            if (!fromWorkTrains.isEmpty()) {
+                DataStorage.setTrainsFromWorkToHome(fromWorkTrains);
+                Log.d(LOG_TAG, "fromWorkTrains: " + fromWorkTrains);
             }
 
             SchedulerUtil.sendUpdateWidget(context);
-            return "ok";
+            return SUCCESS_RESPONSE;
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             return e.getMessage();
@@ -57,130 +65,90 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
     }
 
     @Override
-    protected void onPostExecute(String s) {
+    protected void onPostExecute(String response) {
         Log.i(LOG_TAG, "onPostExecute()");
-        SchedulerUtil.sendUpdateWidget(context);
+        int timeToNextExecute;
+        if (SUCCESS_RESPONSE.equals(response)) {
+            SchedulerUtil.sendUpdateWidget(context);
+            timeToNextExecute = 2 * 60; // 2 hours
+        } else {
+            timeToNextExecute = 5; // 2 hours
+            Log.w(LOG_TAG, "unsuccess result code: " + response + ". reschedule retrieve data in 5 minute");
+        }
+        SchedulerUtil.scheduleTrainScheduleRequest(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE),timeToNextExecute);
     }
 
+    private List<TrainThread> loadTrainSchedule(boolean fromHome) throws IOException {
+        String content = getUrlContent(createURL(fromHome));
+        Log.d(LOG_TAG, "service response: " + content);
 
-    private static final String MOCK_JSON = "{\n" +
-            "  \"pagination\": {\n" +
-            "    \"has_next\": false,\n" +
-            "    \"per_page\": 100,\n" +
-            "    \"page_count\": 1,\n" +
-            "    \"total\": 9,\n" +
-            "    \"page\": 1\n" +
-            "  },\n" +
-            "  \"threads\": [\n" +
-            "    {\n" +
-            "      \"arrival\": \"2016-01-15 15:15:00\",\n" +
-            "      \"departure\": \"2016-01-15 14:15:00\",\n" +
-            "      \"duration\": 8100.0,\n" +
-            "      \"arrival_terminal\": \"D\",\n" +
-            "      \"arrival_platform\": null,\n" +
-            "      \"from\": {\n" +
-            "        \"code\": \"s9600396\",\n" +
-            "        \"station_type\": \"аэропорт\",\n" +
-            "        \"title\": \"Симферополь\",\n" +
-            "        \"popular_title\": \"\",\n" +
-            "        \"short_title\": \"\",\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"type\": \"station\"\n" +
-            "      },\n" +
-            "      \"thread\": {\n" +
-            "        \"carrier\": {\n" +
-            "          \"title\": \"Аэрофлот\",\n" +
-            "          \"code\": 26,\n" +
-            "          \"codes\": {\n" +
-            "            \"icao\": null,\n" +
-            "            \"sirena\": \"СУ\",\n" +
-            "            \"iata\": \"SU\"\n" +
-            "          }\n" +
-            "        },\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"uid\": \"SU-1827A_c26_agent\",\n" +
-            "        \"title\": \"Симферополь - Москва\",\n" +
-            "        \"vehicle\": \"Airbus А320\",\n" +
-            "        \"number\": \"SU 1827\",\n" +
-            "        \"short_title\": \"Симферополь - Москва\",\n" +
-            "        \"express_type\": null\n" +
-            "      },\n" +
-            "      \"departure_platform\": null,\n" +
-            "      \"stops\": \"\",\n" +
-            "      \"to\": {\n" +
-            "        \"code\": \"s9600213\",\n" +
-            "        \"station_type\": \"аэропорт\",\n" +
-            "        \"title\": \"Шереметьево\",\n" +
-            "        \"popular_title\": \"\",\n" +
-            "        \"short_title\": \"\",\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"type\": \"station\"\n" +
-            "      },\n" +
-            "      \"departure_terminal\": null\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"arrival\": \"2016-01-15 16:15:00\",\n" +
-            "      \"departure\": \"2016-01-15 15:15:00\",\n" +
-            "      \"duration\": 8100.0,\n" +
-            "      \"arrival_terminal\": \"D\",\n" +
-            "      \"arrival_platform\": null,\n" +
-            "      \"from\": {\n" +
-            "        \"code\": \"s9600396\",\n" +
-            "        \"station_type\": \"аэропорт\",\n" +
-            "        \"title\": \"Симферополь\",\n" +
-            "        \"popular_title\": \"\",\n" +
-            "        \"short_title\": \"\",\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"type\": \"station\"\n" +
-            "      },\n" +
-            "      \"thread\": {\n" +
-            "        \"carrier\": {\n" +
-            "          \"title\": \"Аэрофлот\",\n" +
-            "          \"code\": 26,\n" +
-            "          \"codes\": {\n" +
-            "            \"icao\": null,\n" +
-            "            \"sirena\": \"СУ\",\n" +
-            "            \"iata\": \"SU\"\n" +
-            "          }\n" +
-            "        },\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"uid\": \"SU-1827A_c26_agent\",\n" +
-            "        \"title\": \"Симферополь - Москва\",\n" +
-            "        \"vehicle\": \"Airbus А320\",\n" +
-            "        \"number\": \"SU 1827\",\n" +
-            "        \"short_title\": \"Симферополь - Москва\",\n" +
-            "        \"express_type\": null\n" +
-            "      },\n" +
-            "      \"departure_platform\": null,\n" +
-            "      \"stops\": \"\",\n" +
-            "      \"to\": {\n" +
-            "        \"code\": \"s9600213\",\n" +
-            "        \"station_type\": \"аэропорт\",\n" +
-            "        \"title\": \"Шереметьево\",\n" +
-            "        \"popular_title\": \"\",\n" +
-            "        \"short_title\": \"\",\n" +
-            "        \"transport_type\": \"plane\",\n" +
-            "        \"type\": \"station\"\n" +
-            "      },\n" +
-            "      \"departure_terminal\": null\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"search\": {\n" +
-            "    \"date\": \"2015-09-02\",\n" +
-            "    \"to\": {\n" +
-            "      \"code\": \"c213\",\n" +
-            "      \"type\": \"settlement\",\n" +
-            "      \"popular_title\": \"Москва\",\n" +
-            "      \"short_title\": \"Москва\",\n" +
-            "      \"title\": \"Москва\"\n" +
-            "    },\n" +
-            "    \"from\": {\n" +
-            "      \"code\": \"c146\",\n" +
-            "      \"type\": \"settlement\",\n" +
-            "      \"popular_title\": \"Симферополь\",\n" +
-            "      \"short_title\": \"Симферополь\",\n" +
-            "      \"title\": \"Симферополь\"\n" +
-            "    }\n" +
-            "  }\n" +
-            "}";
+        ScheduleResponse response = mapper.readValue(content, ScheduleResponse.class);
+
+        return YandexToDomainConverter.scheduleResponseToDomain(response);
+    }
+
+    private String getUrlContent(URL url) throws IOException {
+        HttpURLConnection urlConnection = null;
+        StringBuilder result = new StringBuilder();
+        Log.i(LOG_TAG, "Getting content for url " + url);
+        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            BufferedReader reader
+                    = new BufferedReader(new InputStreamReader(new BufferedInputStream(urlConnection.getInputStream())));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+        } finally {
+            urlConnection.disconnect();
+        }
+
+        return result.toString();
+    }
+
+    private URL createURL(boolean fromHome) throws MalformedURLException {
+        String url = String.format(
+                URL_TEMPLATE,
+                fromHome ? HOME_STATION_CODE : WORK_STATION_CODE,
+                fromHome ? WORK_STATION_CODE : HOME_STATION_CODE,
+                new SimpleDateFormat("yyyy-MM-dd").format(new Date())
+        );
+        return new URL(url);
+    }
+
+    private static ObjectMapper getJsonMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
+        return mapper;
+    }
+
+/*
+    private static final String MOCK_JSON = "{" +
+            "\"pagination\":{\"has_next\":false,\"per_page\":100,\"page_count\":1,\"total\":64,\"page\":1}," +
+            "\"threads\":[" +
+                "{\"arrival\":\"2016-02-14 00:28:00\"," +
+                "\"duration\":1380.0," +
+                "\"arrival_terminal\":null," +
+                "\"arrival_platform\":\"\"," +
+                "\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"}," +
+                "\"thread\":{" +
+                    "\"carrier\":{\"code\":153,\"codes\":{\"icao\":null,\"sirena\":null,\"iata\":null},\"title\":\"Центральная пригородная пассажирская компания\"}," +
+                    "\"transport_type\":\"suburban\"," +
+                    "\"uid\":\"6627_0_2000008_g16_4\"," +
+                    "\"title\":\"Москва (Рижский вокзал) - Нахабино\"," +
+                    "\"vehicle\":null," +
+                    "\"number\":\"6627\"," +
+                    "\"short_title\":\"М-Рижская - Нахабино\"," +
+                    "\"express_type\":null}," +
+                "\"departure_platform\":\"\"," +
+                "\"departure\":\"2016-02-14 00:05:00\"," +
+                "\"stops\":\"везде\"," +
+                "\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"}," +
+                "\"departure_terminal\":null" +
+            "}," +
+            "{\"arrival\":\"2016-02-14 00:56:00\",\"duration\":1440.0,\"arrival_terminal\":null,\"arrival_platform\":\"\",\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"},\"thread\":{\"carrier\":{\"code\":153,\"codes\":{\"icao\":null,\"sirena\":null,\"iata\":null},\"title\":\"Центральная пригородная пассажирская компания\"},\"transport_type\":\"suburban\",\"uid\":\"6529_0_2000008_g16_4\",\"title\":\"Москва (Рижский вокзал) - Новоиерусалимская\",\"vehicle\":null,\"number\":\"6529\",\"short_title\":\"М-Рижская - Н-Иерусалим\",\"express_type\":null},\"departure_platform\":\"\",\"departure\":\"2016-02-14 00:32:00\",\"stops\":\"везде\",\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"},\"departure_terminal\":null}]," +
+            "\"search\":{\"date\":\"2016-02-13\",\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"},\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"}}}";*/
 }
+

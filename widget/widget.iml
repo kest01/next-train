@@ -106,6 +106,7 @@
     <orderEntry type="library" exported="" name="play-services-gcm-8.4.0" level="project" />
     <orderEntry type="library" exported="" name="spring-android-rest-template-2.0.0.M3" level="project" />
     <orderEntry type="library" exported="" name="jackson-annotations-2.6.0" level="project" />
+    <orderEntry type="library" exported="" name="lombok-1.12.6" level="project" />
     <orderEntry type="library" exported="" name="support-v4-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="spring-android-core-2.0.0.M3" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-8.4.0" level="project" />

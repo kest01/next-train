@@ -45,6 +45,7 @@ public class TrainsWidget extends AppWidgetProvider {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         SchedulerUtil.sendUpdateLocation(context);
+        SchedulerUtil.sendTrainScheduleRequest(context);
         SchedulerUtil.scheduleUpdateWidget(context, alarmManager);
         SchedulerUtil.scheduleUpdateLocation(context, alarmManager);
     }
@@ -54,7 +55,7 @@ public class TrainsWidget extends AppWidgetProvider {
                          int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d(LOG_TAG, "onUpdate " + Arrays.toString(appWidgetIds));
-//        SchedulerUtil.sendUpdateLocation(context);
+
         updateWidgets(context, appWidgetManager, appWidgetIds);
     }
 
@@ -65,7 +66,7 @@ public class TrainsWidget extends AppWidgetProvider {
 
         NotificationUtil.createOrUpdateNotification(context);
         if (!DataStorage.isSetTrainThreads()) {
-            SchedulerUtil.sendUpdateLocation(context);
+            SchedulerUtil.sendTrainScheduleRequest(context);
         }
         SchedulerUtil.scheduleUpdateWidget(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE));
         Toast.makeText(context, "updateWidget", Toast.LENGTH_SHORT).show();
@@ -79,6 +80,7 @@ public class TrainsWidget extends AppWidgetProvider {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         SchedulerUtil.cancelScheduleUpdateWidget(context, alarmManager);
         SchedulerUtil.cancelScheduleUpdateLocation(context, alarmManager);
+        SchedulerUtil.cancelScheduleTrainScheduleRequest(context, alarmManager);
     }
 
     @Override
@@ -110,6 +112,7 @@ public class TrainsWidget extends AppWidgetProvider {
 //            Toast.makeText(context, ":: " + intent.toString(), Toast.LENGTH_LONG).show();
             if (DataStorage.isSetTrainThreads()) {
                 boolean homeToWork = intent.getBooleanExtra(HOME_TO_WORK, true);
+                // TODO передавать индекс коллекции нельзя, т.к. колекция меняется. нужно попробовать передавать весь маршрут
                 int recordId = intent.getIntExtra(RECORD_ID, 0);
                 List<TrainThread> trainThreads = homeToWork ? DataStorage.getTrainsFromHomeToWork() : DataStorage.getTrainsFromWorkToHome();
                 TrainThread thread = trainThreads.get(recordId);
@@ -136,42 +139,38 @@ public class TrainsWidget extends AppWidgetProvider {
             }
             indexOfNextTrains = indexOfNextTrains(trainThreads);
         }
-        Log.d(LOG_TAG, "updateWidget: " + indexOfNextTrains + " : " + trainThreads);
+        Log.d(LOG_TAG, "updateWidget: " + indexOfNextTrains + " : " + (trainThreads == null ? null : trainThreads.size()));
 
         // Помещаем данные в текстовые поля
         RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget);
         Resources res = context.getResources();
 
         for (int i = 1; i <= 2; i++) {
-            int fromId = res.getIdentifier("from" + i, "id", context.getPackageName());
-            int toId = res.getIdentifier("to" + i, "id", context.getPackageName());
-            int departId = res.getIdentifier("depart" + i, "id", context.getPackageName());
+            int timeId = res.getIdentifier("time" + i, "id", context.getPackageName());
+            int threadTitleId = res.getIdentifier("threadTitle" + i, "id", context.getPackageName());
             int layoutId = res.getIdentifier("ll" + i, "id", context.getPackageName());
 
             // Clear all field
-            widgetView.setTextViewText(fromId, "");
-            widgetView.setTextViewText(toId, "");
-            widgetView.setTextViewText(departId, "");
+            widgetView.setTextViewText(timeId, "");
+            widgetView.setTextViewText(threadTitleId, "");
 
             if (indexOfNextTrains != null && (indexOfNextTrains + i) <= trainThreads.size()) {
                 int recordIndex = indexOfNextTrains + i - 1;
                 TrainThread thread = trainThreads.get(recordIndex);
-//                Log.d(LOG_TAG, "TrainThread: " + thread);
-                widgetView.setTextViewText(fromId, thread.getFromName());
-                widgetView.setTextViewText(toId, thread.getToName());
 
                 DateFormat dateFormatter = new SimpleDateFormat("HH:mm");
                 String departTime = dateFormatter.format(thread.getDeparture());
                 String arrivalTime = dateFormatter.format(thread.getArrival());
 
-                widgetView.setTextViewText(departId, departTime + " - " + arrivalTime);
+                widgetView.setTextViewText(timeId, departTime + " - " + arrivalTime);
+                widgetView.setTextViewText(threadTitleId, thread.getTitle());
 
 //                Intent onClickIntent = new Intent(context, TrainsWidget.class);
                 Intent popUpIntent = new Intent(context, PopUpActivity.class);
                 popUpIntent.setAction(CREATE_NOTIFICATION);
                 popUpIntent.putExtra(HOME_TO_WORK, homeToWork);
                 popUpIntent.putExtra(RECORD_ID, recordIndex);
-                popUpIntent.putExtra(DETAILS, departTime + " " + thread.getFromName() + " - " + thread.getToName());
+                popUpIntent.putExtra(DETAILS, departTime + " " + thread.getTitle());
                 popUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 int requestCode = recordIndex + (homeToWork ? 1000 : 0);
 

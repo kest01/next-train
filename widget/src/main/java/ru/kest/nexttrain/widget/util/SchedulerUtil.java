@@ -37,9 +37,19 @@ public class SchedulerUtil {
         alarmManager.setRepeating(
                 AlarmManager.RTC,
                 System.currentTimeMillis(),
-                60 * 60 * 1000,
+                60 * 60 * 1000,            // 1 hour
                 createBroadcastPI(
                         context, createIntent(context, UPDATE_LOCATION)
+                )
+        );
+    }
+
+    public static void scheduleTrainScheduleRequest(Context context, AlarmManager alarmManager, int munitesToNextExecute) {
+        alarmManager.set(
+                AlarmManager.RTC,
+                System.currentTimeMillis() + munitesToNextExecute * 60 * 1000,
+                createBroadcastPI(
+                        context, createIntent(context, TRAIN_SCHEDULE_REQUEST)
                 )
         );
     }
@@ -71,6 +81,14 @@ public class SchedulerUtil {
         alarmManager.cancel(
                 createBroadcastPI(
                     context, createIntent(context, UPDATE_LOCATION)
+                )
+        );
+    }
+
+    public static void cancelScheduleTrainScheduleRequest(Context context, AlarmManager alarmManager) {
+        alarmManager.cancel(
+                createBroadcastPI(
+                    context, createIntent(context, TRAIN_SCHEDULE_REQUEST)
                 )
         );
     }

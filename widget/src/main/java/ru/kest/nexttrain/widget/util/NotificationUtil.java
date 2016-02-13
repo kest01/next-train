@@ -24,6 +24,7 @@ import static ru.kest.nexttrain.widget.util.Constants.NOTIFICATION_ID;
  */
 public class NotificationUtil {
 
+    // TODO need to refactor this porno
     public static void createOrUpdateNotification(Context context) {
         TrainThread thread = DataStorage.getNotificationTrain();
         Log.d(LOG_TAG, "createOrUpdateNotification: " + thread);
@@ -43,7 +44,7 @@ public class NotificationUtil {
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("Электричка через " + diffMin + " мин")
-                        .setContentText(currentTime + " " + departTime + " " + thread.getFromName() + " - " + thread.getToName());
+                        .setContentText(currentTime + " " + departTime + " " + thread.getTitle());
 
         Intent deleteIntent = new Intent(context, TrainsWidget.class);
         deleteIntent.setAction(DELETED_NOTIFICATION);

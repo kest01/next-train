@@ -1,31 +1,29 @@
 package ru.kest.nexttrain.widget.convertors;
 
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
-import ru.kest.nexttrain.widget.model.yandex.TrainScheduleResponse;
+import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by KKharitonov on 07.01.2016.
  */
 public class YandexToDomainConverter {
 
-    public static List<TrainThread> scheduleResponseToDomain(TrainScheduleResponse trainScheduleResponse) {
+    public static List<TrainThread> scheduleResponseToDomain(ScheduleResponse trainScheduleResponse) {
         List<TrainThread> result = new ArrayList<>();
         if (trainScheduleResponse != null && trainScheduleResponse.getThreads() != null && trainScheduleResponse.getThreads().size() > 0) {
-            for (ru.kest.nexttrain.widget.model.yandex.TrainThread threadYandex : trainScheduleResponse.getThreads()) {
-                TrainThread threadDomain = new TrainThread();
-                threadDomain.setArrival(threadYandex.getArrival());
-                threadDomain.setDeparture(threadYandex.getDeparture());
-                threadDomain.setFromCode(threadYandex.getFrom().getCode());
-                threadDomain.setFromName(threadYandex.getFrom().getTitle());
-                threadDomain.setToCode(threadYandex.getTo().getCode());
-                threadDomain.setToName(threadYandex.getTo().getTitle());
-                threadDomain.setTitle(threadYandex.getThread().getTitle());
-                result.add(threadDomain);
+            for (ScheduleResponse.TrainThread yandexThread : trainScheduleResponse.getThreads()) {
+/*
+                if (yandexThread.getDeparture().before(new Date())) {
+                    continue;
+                }
+*/
+                TrainThread domainThread = new TrainThread();
+                domainThread.setArrival(new Date(yandexThread.getArrival().getTime() + 4*60*60*1000));
+                domainThread.setDeparture(new Date(yandexThread.getDeparture().getTime() + 4*60*60*1000));
+                domainThread.setTitle(yandexThread.getThread().getShortTitle());
+                result.add(domainThread);
             }
             Collections.sort(result, new Comparator<TrainThread>() {
                 @Override
