@@ -14,7 +14,6 @@ public interface Constants {
     String DELETED_NOTIFICATION = "DELETED_NOTIFICATION";
 
     // Extras
-    String HOME_TO_WORK = "HOME_TO_WORK";
     String RECORD_HASH = "RECORD_HASH";
     String DETAILS = "DETAILS";
 

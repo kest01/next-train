@@ -6,12 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ru.kest.nexttrain.widget.R;
 import ru.kest.nexttrain.widget.TrainsWidget;
 import ru.kest.nexttrain.widget.util.Constants;
 
+import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
 import static ru.kest.nexttrain.widget.util.Constants.*;
 
 public class PopUpActivity extends Activity {
@@ -21,10 +23,14 @@ public class PopUpActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(0));
 
+        Log.i(LOG_TAG, "PopUpActivity.onCreate()");
         // Should do a proper argument verification here
         Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.containsKey(Constants.HOME_TO_WORK)) {
+        if (extras != null && extras.containsKey(Constants.DETAILS)) {
             displayDialog(extras);
+        } else {
+            Log.w(LOG_TAG, "PopUpActivity: detail for dialog not found, finishing");
+            finish();
         }
     }
 

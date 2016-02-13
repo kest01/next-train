@@ -50,14 +50,11 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
                 DataStorage.setTrainsFromHomeToWork(fromHomeTrains);
                 Log.d(LOG_TAG, "fromHomeTrains: " + fromHomeTrains);
             }
-
             List<TrainThread> fromWorkTrains = loadTrainSchedule(false);
             if (!fromWorkTrains.isEmpty()) {
                 DataStorage.setTrainsFromWorkToHome(fromWorkTrains);
                 Log.d(LOG_TAG, "fromWorkTrains: " + fromWorkTrains);
             }
-
-            SchedulerUtil.sendUpdateWidget(context);
             return SUCCESS_RESPONSE;
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -70,6 +67,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
         Log.i(LOG_TAG, "onPostExecute()");
         int timeToNextExecute;
         if (SUCCESS_RESPONSE.equals(response)) {
+            Log.i(LOG_TAG, "Train schedules successfully updated");
             SchedulerUtil.sendUpdateWidget(context);
             timeToNextExecute = 2 * 60; // 2 hours
         } else {
@@ -81,7 +79,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
     private List<TrainThread> loadTrainSchedule(boolean fromHome) throws IOException {
         String content = getUrlContent(createURL(fromHome));
-        Log.d(LOG_TAG, "service response: " + content);
+//        Log.d(LOG_TAG, "service response: " + content);
 
         ScheduleResponse response = mapper.readValue(content, ScheduleResponse.class);
 

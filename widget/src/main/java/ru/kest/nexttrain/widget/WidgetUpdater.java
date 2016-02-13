@@ -70,9 +70,7 @@ public class WidgetUpdater {
 
                 widgetView.setOnClickPendingIntent(layoutId, createPopUpDialogPendingIntent(context, thread));
             }
-
         }
-
         // Обновляем виджет
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }
@@ -84,7 +82,7 @@ public class WidgetUpdater {
         popUpIntent.putExtra(RECORD_HASH, thread.hashCode());
         popUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        return PendingIntent.getActivity(context, 0, popUpIntent, 0);
+        return PendingIntent.getActivity(context, thread.hashCode(), popUpIntent, 0);
     }
 
     @Nullable
