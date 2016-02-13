@@ -64,9 +64,8 @@ public class SchedulerUtil {
         context.sendBroadcast(intent);
     }
 
-    public static void sendTrainScheduleRequest(Context context) {
-        Intent intent = createIntent(context, TRAIN_SCHEDULE_REQUEST);
-        context.sendBroadcast(intent);
+    public static void sendTrainScheduleRequest(Context context, AlarmManager alarmManager) {
+        scheduleTrainScheduleRequest(context, alarmManager, 0);
     }
 
     public static void cancelScheduleUpdateWidget(Context context, AlarmManager alarmManager) {
@@ -94,9 +93,7 @@ public class SchedulerUtil {
     }
 
     private static Intent createIntent(Context context, String action) {
-        Intent intent = new Intent(context, TrainsWidget.class);
-        intent.setAction(action);
-        return intent;
+        return new Intent(context, TrainsWidget.class).setAction(action);
     }
 
     private static PendingIntent createBroadcastPI(Context context, Intent intent) {

@@ -14,14 +14,12 @@ public class YandexToDomainConverter {
         List<TrainThread> result = new ArrayList<>();
         if (trainScheduleResponse != null && trainScheduleResponse.getThreads() != null && trainScheduleResponse.getThreads().size() > 0) {
             for (ScheduleResponse.TrainThread yandexThread : trainScheduleResponse.getThreads()) {
-/*
                 if (yandexThread.getDeparture().before(new Date())) {
                     continue;
                 }
-*/
                 TrainThread domainThread = new TrainThread();
-                domainThread.setArrival(new Date(yandexThread.getArrival().getTime() + 4*60*60*1000));
-                domainThread.setDeparture(new Date(yandexThread.getDeparture().getTime() + 4*60*60*1000));
+                domainThread.setArrival(yandexThread.getArrival());
+                domainThread.setDeparture(yandexThread.getDeparture());
                 domainThread.setTitle(yandexThread.getThread().getShortTitle());
                 result.add(domainThread);
             }

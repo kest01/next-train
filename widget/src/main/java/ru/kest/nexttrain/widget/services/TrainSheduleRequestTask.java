@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
+import ru.kest.nexttrain.widget.util.DateUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
 import java.io.*;
@@ -112,7 +113,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
                 URL_TEMPLATE,
                 fromHome ? HOME_STATION_CODE : WORK_STATION_CODE,
                 fromHome ? WORK_STATION_CODE : HOME_STATION_CODE,
-                new SimpleDateFormat("yyyy-MM-dd").format(new Date())
+                DateUtil.getDay(new Date())
         );
         return new URL(url);
     }
@@ -123,32 +124,5 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
         return mapper;
     }
-
-/*
-    private static final String MOCK_JSON = "{" +
-            "\"pagination\":{\"has_next\":false,\"per_page\":100,\"page_count\":1,\"total\":64,\"page\":1}," +
-            "\"threads\":[" +
-                "{\"arrival\":\"2016-02-14 00:28:00\"," +
-                "\"duration\":1380.0," +
-                "\"arrival_terminal\":null," +
-                "\"arrival_platform\":\"\"," +
-                "\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"}," +
-                "\"thread\":{" +
-                    "\"carrier\":{\"code\":153,\"codes\":{\"icao\":null,\"sirena\":null,\"iata\":null},\"title\":\"Центральная пригородная пассажирская компания\"}," +
-                    "\"transport_type\":\"suburban\"," +
-                    "\"uid\":\"6627_0_2000008_g16_4\"," +
-                    "\"title\":\"Москва (Рижский вокзал) - Нахабино\"," +
-                    "\"vehicle\":null," +
-                    "\"number\":\"6627\"," +
-                    "\"short_title\":\"М-Рижская - Нахабино\"," +
-                    "\"express_type\":null}," +
-                "\"departure_platform\":\"\"," +
-                "\"departure\":\"2016-02-14 00:05:00\"," +
-                "\"stops\":\"везде\"," +
-                "\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"}," +
-                "\"departure_terminal\":null" +
-            "}," +
-            "{\"arrival\":\"2016-02-14 00:56:00\",\"duration\":1440.0,\"arrival_terminal\":null,\"arrival_platform\":\"\",\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"},\"thread\":{\"carrier\":{\"code\":153,\"codes\":{\"icao\":null,\"sirena\":null,\"iata\":null},\"title\":\"Центральная пригородная пассажирская компания\"},\"transport_type\":\"suburban\",\"uid\":\"6529_0_2000008_g16_4\",\"title\":\"Москва (Рижский вокзал) - Новоиерусалимская\",\"vehicle\":null,\"number\":\"6529\",\"short_title\":\"М-Рижская - Н-Иерусалим\",\"express_type\":null},\"departure_platform\":\"\",\"departure\":\"2016-02-14 00:32:00\",\"stops\":\"везде\",\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"},\"departure_terminal\":null}]," +
-            "\"search\":{\"date\":\"2016-02-13\",\"to\":{\"code\":\"s9601770\",\"station_type\":\"платформа\",\"title\":\"Аникеевка\",\"popular_title\":null,\"short_title\":null,\"transport_type\":\"train\",\"type\":\"station\"},\"from\":{\"code\":\"s9601251\",\"station_type\":\"платформа\",\"title\":\"Покровское-Стрешнево\",\"popular_title\":\"\",\"short_title\":\"П-Стрешнево\",\"transport_type\":\"train\",\"type\":\"station\"}}}";*/
 }
 

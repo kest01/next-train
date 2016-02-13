@@ -1,6 +1,8 @@
 package ru.kest.nexttrain.widget.services;
 
 import android.location.Location;
+import lombok.Getter;
+import lombok.Setter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 
 import java.util.List;
@@ -10,53 +12,43 @@ import java.util.List;
  */
 public class DataStorage {
 
+    @Getter @Setter
     private static List<TrainThread> trainsFromHomeToWork;
+    @Getter @Setter
     private static List<TrainThread> trainsFromWorkToHome;
+    @Getter @Setter
     private static Location lastLocation;
+    @Getter @Setter
     private static TrainThread notificationTrain;
-
-    public static List<TrainThread> getTrainsFromHomeToWork() {
-        return trainsFromHomeToWork;
-    }
-
-    public static void setTrainsFromHomeToWork(List<TrainThread> trainsFromHomeToWork) {
-        DataStorage.trainsFromHomeToWork = trainsFromHomeToWork;
-    }
 
     public static boolean isSetTrainThreads() {
         return trainsFromHomeToWork != null && trainsFromHomeToWork.size() > 0
                 && trainsFromWorkToHome != null && trainsFromWorkToHome.size() > 0;
     }
 
-    public static List<TrainThread> getTrainsFromWorkToHome() {
-        return trainsFromWorkToHome;
-    }
-
-    public static void setTrainsFromWorkToHome(List<TrainThread> trainsFromWorkToHome) {
-        DataStorage.trainsFromWorkToHome = trainsFromWorkToHome;
-    }
-
-    public static Location getLastLocation() {
-        return lastLocation;
-    }
-
     public static boolean isSetLastLocation() {
         return lastLocation != null;
     }
 
-    public static void setLastLocation(Location lastLocation) {
-        DataStorage.lastLocation = lastLocation;
-    }
-
-    public static TrainThread getNotificationTrain() {
-        return notificationTrain;
-    }
-
-    public static void setNotificationTrain(TrainThread notificationTrain) {
-        DataStorage.notificationTrain = notificationTrain;
-    }
-
     public static boolean isSetNotificationTrain() {
         return notificationTrain != null;
+    }
+
+    public static TrainThread getThreadByHash(int hash) {
+        TrainThread result = getThreadByHash(trainsFromHomeToWork, hash);
+        if (result == null) {
+            result = getThreadByHash(trainsFromWorkToHome, hash);
+        }
+        return result;
+    }
+    private static TrainThread getThreadByHash(List<TrainThread> threads, int hash) {
+        if (threads != null) {
+            for (TrainThread thread : threads) {
+                if (thread.hashCode() == hash) {
+                    return thread;
+                }
+            }
+        }
+        return null;
     }
 }

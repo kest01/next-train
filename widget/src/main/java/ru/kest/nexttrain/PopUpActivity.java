@@ -38,8 +38,7 @@ public class PopUpActivity extends Activity {
                         //                Intent onClickIntent = new Intent(context, TrainsWidget.class);
                         Intent notificationIntent = new Intent(PopUpActivity.this, TrainsWidget.class);
                         notificationIntent.setAction(CREATE_NOTIFICATION);
-                        notificationIntent.putExtra(HOME_TO_WORK, extras.getBoolean(HOME_TO_WORK));
-                        notificationIntent.putExtra(RECORD_ID, extras.getInt(RECORD_ID));
+                        notificationIntent.putExtra(RECORD_HASH, extras.getInt(RECORD_HASH));
                         sendBroadcast(notificationIntent);
 
                         // Handle a positive answer

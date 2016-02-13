@@ -11,8 +11,6 @@ import ru.kest.nexttrain.widget.TrainsWidget;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.DataStorage;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
@@ -24,27 +22,18 @@ import static ru.kest.nexttrain.widget.util.Constants.NOTIFICATION_ID;
  */
 public class NotificationUtil {
 
-    // TODO need to refactor this porno
     public static void createOrUpdateNotification(Context context) {
         TrainThread thread = DataStorage.getNotificationTrain();
         Log.d(LOG_TAG, "createOrUpdateNotification: " + thread);
         if (thread == null) {
             return;
         }
-        //Comparing dates
-        long diff = Math.abs(thread.getDeparture().getTime() - System.currentTimeMillis());
-        long diffMin = diff / (60 * 1000);
-
-        DateFormat dateFormatter = new SimpleDateFormat("HH:mm");
-        String departTime = dateFormatter.format(thread.getDeparture());
-
-        String currentTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Электричка через " + diffMin + " мин")
-                        .setContentText(currentTime + " " + departTime + " " + thread.getTitle());
+                        .setContentTitle("Электричка через " + getDiffInMinutes(thread.getDeparture()) + " мин")
+                        .setContentText(DateUtil.getTimeWithSeconds(new Date()) + " " + DateUtil.getTime(thread.getDeparture()) + " " + thread.getTitle());
 
         Intent deleteIntent = new Intent(context, TrainsWidget.class);
         deleteIntent.setAction(DELETED_NOTIFICATION);
@@ -55,5 +44,10 @@ public class NotificationUtil {
         // отправляем
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(NOTIFICATION_ID, mBuilder.build());
+    }
+
+    private static long getDiffInMinutes(Date time) {
+        long diff = Math.abs(time.getTime() - System.currentTimeMillis());
+        return diff / (60 * 1000);
     }
 }
