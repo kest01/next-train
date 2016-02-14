@@ -75,7 +75,7 @@ public class UIUpdater {
     }
 
     @NonNull
-    private static String getRemainText(int remainTime) {
+    public static String getRemainText(int remainTime) {
         StringBuilder sb = new StringBuilder();
         if (remainTime > 59) {
             int remainHours = remainTime / 60;

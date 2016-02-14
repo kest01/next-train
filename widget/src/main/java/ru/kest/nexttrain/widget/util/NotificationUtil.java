@@ -12,6 +12,7 @@ import ru.kest.nexttrain.widget.TrainsWidget;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.data.DataService;
 import ru.kest.nexttrain.widget.services.data.TimeLimits;
+import ru.kest.nexttrain.widget.ui.UIUpdater;
 
 import java.util.Date;
 
@@ -28,11 +29,12 @@ public class NotificationUtil {
         if (thread == null) {
             return;
         }
-
+        String remainText = UIUpdater.getRemainText(TimeLimits.getTimeDiffInMinutes(thread.getDeparture()));
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Электричка через " + TimeLimits.getTimeDiffInMinutes(thread.getDeparture()) + " мин")
+                        .setContentTitle("Электричка через " + remainText)
+                        .setTicker(remainText)
                         .setContentText(DateUtil.getTimeWithSeconds(new Date()) + " " + DateUtil.getTime(thread.getDeparture()) + " " + thread.getTitle());
 
         Intent deleteIntent = new Intent(context, TrainsWidget.class);
