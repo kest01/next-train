@@ -7,20 +7,23 @@ import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
-import lombok.Setter;
 import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
 import ru.kest.nexttrain.widget.util.DateUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
 
@@ -39,8 +42,8 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
     private ObjectMapper mapper = getJsonMapper();
 
-    @Getter @Setter
-    private static boolean executed = false;
+    @Getter
+    private static AtomicBoolean executed = new AtomicBoolean(false);
 
     public TrainSheduleRequestTask(Context context) {
         this.context = context;
@@ -80,6 +83,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
             Log.w(LOG_TAG, "unsuccess result code: " + response + ". reschedule retrieve data in 5 minute");
         }
         SchedulerUtil.scheduleTrainScheduleRequest(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE),timeToNextExecute);
+        getExecuted().set(false);
     }
 
     private List<TrainThread> loadTrainSchedule(boolean fromHome) throws IOException {

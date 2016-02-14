@@ -91,8 +91,7 @@ public class TrainsWidget extends AppWidgetProvider {
         } else if (intent.getAction().equalsIgnoreCase(UPDATE_LOCATION)) {
             new LocationClient(context).connect();
         } else if (intent.getAction().equalsIgnoreCase(TRAIN_SCHEDULE_REQUEST)) {
-            if (!TrainSheduleRequestTask.isExecuted()) {
-                TrainSheduleRequestTask.setExecuted(true);
+            if (TrainSheduleRequestTask.getExecuted().compareAndSet(false, true)) {
                 new TrainSheduleRequestTask(context).execute();
             }
         } else if (intent.getAction().equalsIgnoreCase(DELETED_NOTIFICATION)) {
