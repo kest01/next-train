@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import lombok.Getter;
+import lombok.Setter;
 import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
@@ -37,6 +39,9 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
     private ObjectMapper mapper = getJsonMapper();
 
+    @Getter @Setter
+    private static boolean executed = false;
+
     public TrainSheduleRequestTask(Context context) {
         this.context = context;
     }
@@ -67,7 +72,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
         Log.i(LOG_TAG, "onPostExecute()");
         int timeToNextExecute;
         if (SUCCESS_RESPONSE.equals(response)) {
-            Log.i(LOG_TAG, "Train schedules successfully updated");
+            Log.i(LOG_TAG, "Train schedules successfully updated: " + DataStorage.getTrainsFromHomeToWork().size() + "  " + DataStorage.getTrainsFromWorkToHome().size());
             SchedulerUtil.sendUpdateWidget(context);
             timeToNextExecute = 2 * 60; // 2 hours
         } else {
