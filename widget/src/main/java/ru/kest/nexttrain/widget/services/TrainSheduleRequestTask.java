@@ -11,6 +11,7 @@ import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
 import ru.kest.nexttrain.widget.util.DateUtil;
+import ru.kest.nexttrain.widget.util.JsonUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
 import java.io.BufferedInputStream;
@@ -40,8 +41,6 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
 
     private Context context;
 
-    private ObjectMapper mapper = getJsonMapper();
-
     @Getter
     private static AtomicBoolean executed = new AtomicBoolean(false);
 
@@ -52,15 +51,16 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         Log.d(LOG_TAG, "TrainSheduleRequestTask.doInBackground()");
+        DataProvider dataProvider = DataService.getDataProvider(context);
         try {
             List<TrainThread> fromHomeTrains = loadTrainSchedule(true);
             if (!fromHomeTrains.isEmpty()) {
-                DataStorage.setTrainsFromHomeToWork(fromHomeTrains);
+                dataProvider.setTrainsFromHomeToWork(fromHomeTrains);
                 Log.d(LOG_TAG, "fromHomeTrains: " + fromHomeTrains);
             }
             List<TrainThread> fromWorkTrains = loadTrainSchedule(false);
             if (!fromWorkTrains.isEmpty()) {
-                DataStorage.setTrainsFromWorkToHome(fromWorkTrains);
+                dataProvider.setTrainsFromWorkToHome(fromWorkTrains);
                 Log.d(LOG_TAG, "fromWorkTrains: " + fromWorkTrains);
             }
             return SUCCESS_RESPONSE;
@@ -75,7 +75,8 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
         Log.i(LOG_TAG, "onPostExecute()");
         int timeToNextExecute;
         if (SUCCESS_RESPONSE.equals(response)) {
-            Log.i(LOG_TAG, "Train schedules successfully updated: " + DataStorage.getTrainsFromHomeToWork().size() + "  " + DataStorage.getTrainsFromWorkToHome().size());
+//            Log.i(LOG_TAG, "Train schedules successfully updated: " + FieldDataStorage.getTrainsFromHomeToWork().size() + "  " + FieldDataStorage.getTrainsFromWorkToHome().size());
+            Log.i(LOG_TAG, "Train schedules successfully updated");
             SchedulerUtil.sendUpdateWidget(context);
             timeToNextExecute = 2 * 60; // 2 hours
         } else {
@@ -90,7 +91,7 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
         String content = getUrlContent(createURL(fromHome));
 //        Log.d(LOG_TAG, "service response: " + content);
 
-        ScheduleResponse response = mapper.readValue(content, ScheduleResponse.class);
+        ScheduleResponse response = JsonUtil.stringToObject(content, ScheduleResponse.class);
 
         return YandexToDomainConverter.scheduleResponseToDomain(response);
     }

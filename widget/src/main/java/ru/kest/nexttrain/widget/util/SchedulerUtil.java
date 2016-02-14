@@ -33,6 +33,22 @@ public class SchedulerUtil {
         );
     }
 
+    public static void scheduleUpdateNotification(Context context, AlarmManager alarmManager) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MINUTE, 1);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(),
+                createBroadcastPI(
+                        context, createIntent(context, UPDATE_NOTIFICATION)
+                )
+        );
+    }
+
     public static void scheduleUpdateLocation(Context context, AlarmManager alarmManager) {
         alarmManager.setRepeating(
                 AlarmManager.RTC,
@@ -92,6 +108,14 @@ public class SchedulerUtil {
         );
     }
 
+    public static void cancelScheduleUpdateNotification(Context context, AlarmManager alarmManager) {
+        alarmManager.cancel(
+                createBroadcastPI(
+                    context, createIntent(context, UPDATE_NOTIFICATION)
+                )
+        );
+    }
+
     private static Intent createIntent(Context context, String action) {
         return new Intent(context, TrainsWidget.class).setAction(action);
     }
@@ -100,5 +124,9 @@ public class SchedulerUtil {
         return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
+
+    public static AlarmManager getAlarmManager(Context context){
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+    }
 
 }

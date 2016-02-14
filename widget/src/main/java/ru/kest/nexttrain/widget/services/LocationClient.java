@@ -16,15 +16,6 @@ import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
  */
 public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final Location homeLocation = new Location("");
-    private static final Location workLocation = new Location("");
-    {
-        homeLocation.setLatitude(55.8300989);
-        homeLocation.setLongitude(37.2187062);
-
-        workLocation.setLatitude(55.802753);
-        workLocation.setLongitude(37.491259);
-    }
 
     private GoogleApiClient googleApiClient;
 
@@ -37,38 +28,13 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
                 .build();
     }
 
-    private static int getDistanceToWork() {
-        if (DataStorage.isSetLastLocation()) {
-            return Math.round(workLocation.distanceTo(DataStorage.getLastLocation()));
-        }
-        return 0;
-    }
-
-    private static int getDistanceToHome() {
-        if (DataStorage.isSetLastLocation()) {
-            return Math.round(homeLocation.distanceTo(DataStorage.getLastLocation()));
-        }
-        return 0;
-    }
-
-    public static NearestStation getNearestStation() {
-        if (DataStorage.isSetLastLocation()) {
-            if (getDistanceToHome() < getDistanceToWork()) {
-                return NearestStation.HOME;
-            } else if (getDistanceToWork() < getDistanceToHome()) {
-                return NearestStation.WORK;
-            }
-        }
-        return null;
-    }
-
     public void connect() {
         googleApiClient.connect();
     }
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "onConnected: " + googleApiClient);
-        if (updateLastLocation()) {
+        if (updateLastLocation(DataService.getDataProvider(googleApiClient.getContext()))) {
             SchedulerUtil.sendUpdateWidget(googleApiClient.getContext());
         }
         Log.d(LOG_TAG, "googleApiClient.disconnect()");
@@ -86,25 +52,20 @@ public class LocationClient  implements GoogleApiClient.ConnectionCallbacks, Goo
         Log.d(LOG_TAG, "onConnectionFailed: " + connectionResult);
     }
 
-    private boolean updateLastLocation() {
+    private boolean updateLastLocation(DataProvider dataProvider) {
         Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if(location != null){
-            if (DataStorage.isSetLastLocation()) {
-                if (workLocation.distanceTo(DataStorage.getLastLocation()) > 500) { // difference more then 500 meters
-                    DataStorage.setLastLocation(location);
+            if (dataProvider.isSetLastLocation()) {
+                if (location.distanceTo(dataProvider.getLastLocation()) > 500) { // difference more then 500 meters
+                    dataProvider.setLastLocation(location);
                     return true;
                 }
             } else {
-                DataStorage.setLastLocation(location);
+                dataProvider.setLastLocation(location);
                 return true;
             }
         }
         Log.d(LOG_TAG, "lastLocation has not changed");
         return false;
-    }
-
-    public enum NearestStation {
-        HOME,
-        WORK;
     }
 }
