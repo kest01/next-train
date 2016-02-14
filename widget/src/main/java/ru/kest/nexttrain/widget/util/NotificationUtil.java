@@ -10,13 +10,12 @@ import android.util.Log;
 import ru.kest.nexttrain.widget.R;
 import ru.kest.nexttrain.widget.TrainsWidget;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
-import ru.kest.nexttrain.widget.services.DataService;
+import ru.kest.nexttrain.widget.services.data.DataService;
+import ru.kest.nexttrain.widget.services.data.TimeLimits;
 
 import java.util.Date;
 
-import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
-import static ru.kest.nexttrain.widget.util.Constants.DELETED_NOTIFICATION;
-import static ru.kest.nexttrain.widget.util.Constants.NOTIFICATION_ID;
+import static ru.kest.nexttrain.widget.Constants.*;
 
 /**
  * Created by KKharitonov on 13.01.2016.
@@ -33,7 +32,7 @@ public class NotificationUtil {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Электричка через " + getDiffInMinutes(thread.getDeparture()) + " мин")
+                        .setContentTitle("Электричка через " + TimeLimits.getTimeDiffInMinutes(thread.getDeparture()) + " мин")
                         .setContentText(DateUtil.getTimeWithSeconds(new Date()) + " " + DateUtil.getTime(thread.getDeparture()) + " " + thread.getTitle());
 
         Intent deleteIntent = new Intent(context, TrainsWidget.class);
@@ -48,10 +47,5 @@ public class NotificationUtil {
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         SchedulerUtil.scheduleUpdateNotification(context, alarmManager);
-    }
-
-    private static long getDiffInMinutes(Date time) {
-        long diff = Math.abs(time.getTime() - System.currentTimeMillis());
-        return diff / (60 * 1000);
     }
 }

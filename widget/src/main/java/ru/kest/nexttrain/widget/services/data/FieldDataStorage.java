@@ -1,4 +1,4 @@
-package ru.kest.nexttrain.widget.services;
+package ru.kest.nexttrain.widget.services.data;
 
 import android.location.Location;
 import lombok.AccessLevel;

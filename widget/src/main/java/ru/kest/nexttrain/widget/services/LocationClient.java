@@ -7,9 +7,11 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import ru.kest.nexttrain.widget.services.data.DataProvider;
+import ru.kest.nexttrain.widget.services.data.DataService;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
 
-import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
+import static ru.kest.nexttrain.widget.Constants.LOG_TAG;
 
 /**
  * Created by KKharitonov on 06.01.2016.

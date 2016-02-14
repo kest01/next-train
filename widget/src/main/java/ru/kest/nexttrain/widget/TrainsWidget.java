@@ -11,18 +11,21 @@ import android.util.Log;
 import android.widget.Toast;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.*;
+import ru.kest.nexttrain.widget.services.data.DataProvider;
+import ru.kest.nexttrain.widget.services.data.DataService;
 import ru.kest.nexttrain.widget.util.NotificationUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
+import ru.kest.nexttrain.widget.ui.WidgetUtil;
 
 import java.util.Arrays;
 
-import static ru.kest.nexttrain.widget.util.Constants.*;
+import static ru.kest.nexttrain.widget.Constants.*;
 
 /**
  * Created by KKharitonov on 04.01.2016.
  */
 public class TrainsWidget extends AppWidgetProvider {
-    final static public String LOG_TAG = "nextTrainsLogs";
+
 
 //    private GoogleApiClient googleApiClient;
 
@@ -44,7 +47,7 @@ public class TrainsWidget extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Log.d(LOG_TAG, "onUpdate " + Arrays.toString(appWidgetIds));
 
-        WidgetUpdater.updateWidgets(context, appWidgetManager, appWidgetIds);
+        WidgetUtil.updateWidgets(context, appWidgetManager, appWidgetIds);
     }
 
     @Override
@@ -76,7 +79,7 @@ public class TrainsWidget extends AppWidgetProvider {
                 ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
                 AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                 int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-                WidgetUpdater.updateWidgets(context, appWidgetManager, ids);
+                WidgetUtil.updateWidgets(context, appWidgetManager, ids);
                 break;
             case UPDATE_LOCATION:
                 new LocationClient(context).connect();

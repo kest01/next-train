@@ -9,7 +9,7 @@ import ru.kest.nexttrain.widget.TrainsWidget;
 import java.util.Calendar;
 import java.util.Date;
 
-import static ru.kest.nexttrain.widget.util.Constants.*;
+import static ru.kest.nexttrain.widget.Constants.*;
 
 /**
  * Created by KKharitonov on 06.01.2016.

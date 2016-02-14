@@ -10,6 +10,8 @@ import lombok.Getter;
 import ru.kest.nexttrain.widget.convertors.YandexToDomainConverter;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.model.yandex.ScheduleResponse;
+import ru.kest.nexttrain.widget.services.data.DataProvider;
+import ru.kest.nexttrain.widget.services.data.DataService;
 import ru.kest.nexttrain.widget.util.DateUtil;
 import ru.kest.nexttrain.widget.util.JsonUtil;
 import ru.kest.nexttrain.widget.util.SchedulerUtil;
@@ -25,8 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
+import static ru.kest.nexttrain.widget.Constants.*;
 
 /**
  * Created by KKharitonov on 05.01.2016.

@@ -4,11 +4,12 @@ import android.util.Log;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import ru.kest.nexttrain.widget.TrainsWidget;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import static ru.kest.nexttrain.widget.Constants.LOG_TAG;
 
 /**
  * Created by KKharitonov on 14.02.2016.
@@ -21,7 +22,7 @@ public class JsonUtil {
         try {
             return getJsonMapper().writeValueAsString(source);
         } catch (JsonProcessingException e) {
-            Log.e(TrainsWidget.LOG_TAG, "JsonUtil.objectToString() error saving object: " + source, e);
+            Log.e(LOG_TAG, "JsonUtil.objectToString() error saving object: " + source, e);
             throw new RuntimeException(e);
         }
     }
@@ -30,7 +31,7 @@ public class JsonUtil {
         try {
             return getJsonMapper().readValue(content, clazz);
         } catch (IOException e) {
-            Log.e(TrainsWidget.LOG_TAG, "JsonUtil.stringToObject() error parsing json: " + content, e);
+            Log.e(LOG_TAG, "JsonUtil.stringToObject() error parsing json: " + content, e);
             throw new RuntimeException(e);
         }
     }
@@ -39,7 +40,7 @@ public class JsonUtil {
         try {
             return getJsonMapper().readValue(content, getJsonMapper().getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (IOException e) {
-            Log.e(TrainsWidget.LOG_TAG, "JsonUtil.stringToList() error parsing json: " + content, e);
+            Log.e(LOG_TAG, "JsonUtil.stringToList() error parsing json: " + content, e);
             throw new RuntimeException(e);
         }
     }

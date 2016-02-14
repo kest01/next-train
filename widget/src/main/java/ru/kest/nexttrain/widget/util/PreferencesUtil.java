@@ -5,11 +5,12 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
-import ru.kest.nexttrain.widget.services.FieldDataStorage;
+import ru.kest.nexttrain.widget.services.data.FieldDataStorage;
 
 import java.util.List;
 
-import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
+import static ru.kest.nexttrain.widget.Constants.LOG_TAG;
+
 
 /**
  * Created by KKharitonov on 14.02.2016.

@@ -9,12 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import ru.kest.nexttrain.widget.Constants;
 import ru.kest.nexttrain.widget.R;
 import ru.kest.nexttrain.widget.TrainsWidget;
-import ru.kest.nexttrain.widget.util.Constants;
 
-import static ru.kest.nexttrain.widget.TrainsWidget.LOG_TAG;
-import static ru.kest.nexttrain.widget.util.Constants.*;
+import static ru.kest.nexttrain.widget.Constants.*;
 
 public class PopUpActivity extends Activity {
 
