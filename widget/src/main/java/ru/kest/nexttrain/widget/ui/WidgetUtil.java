@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 import ru.kest.nexttrain.widget.R;
 import ru.kest.nexttrain.widget.model.domain.NearestStation;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
@@ -37,7 +36,7 @@ public class WidgetUtil {
             SchedulerUtil.sendTrainScheduleRequest(context, alarmManager);
         }
         SchedulerUtil.scheduleUpdateWidget(context, alarmManager);
-        Toast.makeText(context, "updateWidget", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "updateWidget", Toast.LENGTH_SHORT).show();
     }
 
     private static void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {

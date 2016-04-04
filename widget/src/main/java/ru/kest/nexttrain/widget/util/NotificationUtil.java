@@ -6,20 +6,18 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import lombok.Getter;
+import lombok.Setter;
 import ru.kest.nexttrain.widget.R;
 import ru.kest.nexttrain.widget.TrainsWidget;
 import ru.kest.nexttrain.widget.model.domain.TrainThread;
 import ru.kest.nexttrain.widget.services.data.DataService;
 import ru.kest.nexttrain.widget.services.data.TimeLimits;
 import ru.kest.nexttrain.widget.ui.UIUpdater;
-
-import java.util.Date;
 
 import static ru.kest.nexttrain.widget.Constants.*;
 
@@ -36,49 +34,59 @@ public class NotificationUtil {
         }
 
         int remainMinutes = TimeLimits.getTimeDiffInMinutes(thread.getDeparture());
-        String remainText = UIUpdater.getRemainText(remainMinutes);
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(NOTIFICATION_ID, createNotification(context, remainText, thread));
 
-        checkAndPlaySound(context, remainMinutes);
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(NOTIFICATION_ID, createNotification(context, remainMinutes, thread));
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         SchedulerUtil.scheduleUpdateNotification(context, alarmManager);
     }
 
-    private static Notification createNotification(Context context, String remainText, TrainThread thread) {
-        NotificationCompat.Builder mBuilder =
+    private static Notification createNotification(Context context, int remainMinutes, TrainThread thread) {
+        String remainText = UIUpdater.getRemainText(remainMinutes);
+
+        NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("Электричка через " + remainText)
                         .setTicker(remainText)
-                        .setContentText(DateUtil.getTimeWithSeconds(new Date()) + " " + DateUtil.getTime(thread.getDeparture()) + " " + thread.getTitle());
+                        .setContentText(DateUtil.getTime(thread.getDeparture()) + " " + thread.getTitle());
 
-        mBuilder.setDeleteIntent(getDeletePendingIntent(context));
-        return mBuilder.build();
+        NotificationSoundAndVibro soundAndVibro = checkAndGetSount(context, remainMinutes);
+        if (soundAndVibro != null) {
+            builder.setSound(soundAndVibro.getSound());
+            builder.setVibrate(soundAndVibro.getVibroPattern());
+        }
+        builder.setDeleteIntent(getDeletePendingIntent(context));
+        return builder.build();
     }
 
-    private static void checkAndPlaySound(Context context, int remainMinutes) {
+    private static NotificationSoundAndVibro checkAndGetSount(Context context, int remainMinutes) {
+
+        NotificationSoundAndVibro result = new NotificationSoundAndVibro();
         TimeLimits tl = new TimeLimits(DataService.getDataProvider(context));
-        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         if (tl.getTimeLimit(FIRST_CALL) == remainMinutes) {
-            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(context, soundUri);
-            r.play();
-            vibrator.vibrate(new long[] {0, 500, 200, 500}, -1);
+            result.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            result.setVibroPattern(new long[] {0, 500, 200, 500});
+            return result;
         } else if (tl.getTimeLimit(LAST_CALL) == remainMinutes) {
-            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(context, soundUri);
-            r.play();
-            vibrator.vibrate(new long[] {0, 500, 200, 500, 200, 500}, -1);
+            result.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.train_horn));
+            result.setVibroPattern(new long[] {0, 500, 200, 500, 200, 500});
+            return result;
         }
-
+        return null;
     }
 
     private static PendingIntent getDeletePendingIntent(Context context) {
         Intent deleteIntent = new Intent(context, TrainsWidget.class);
         deleteIntent.setAction(DELETED_NOTIFICATION);
         return PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
+    }
+
+    @Getter @Setter
+    private static class NotificationSoundAndVibro {
+        Uri sound;
+        long[] vibroPattern;
     }
 }

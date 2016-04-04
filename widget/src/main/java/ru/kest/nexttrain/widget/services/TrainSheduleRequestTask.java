@@ -81,10 +81,10 @@ public class TrainSheduleRequestTask extends AsyncTask<Void, Void, String> {
             SchedulerUtil.sendUpdateWidget(context);
             timeToNextExecute = 2 * 60; // 2 hours
         } else {
-            timeToNextExecute = 5; // 2 hours
+            timeToNextExecute = 5; // 5 min
             Log.w(LOG_TAG, "unsuccess result code: " + response + ". reschedule retrieve data in 5 minute");
         }
-        SchedulerUtil.scheduleTrainScheduleRequest(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE),timeToNextExecute);
+        SchedulerUtil.scheduleTrainScheduleRequest(context, (AlarmManager) context.getSystemService(Context.ALARM_SERVICE), timeToNextExecute);
         getExecuted().set(false);
     }
 
